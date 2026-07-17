@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 896" width="1200" height="896">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#bfe6ff"/>
+      <stop offset="1" stop-color="#e8f6ff"/>
+    </linearGradient>
+    <linearGradient id="pitch" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#57c65a"/>
+      <stop offset="1" stop-color="#3ea043"/>
+    </linearGradient>
+    <style>
+      .ol { stroke:#141414; stroke-width:8; stroke-linejoin:round; stroke-linecap:round; }
+      .ol6 { stroke:#141414; stroke-width:6; stroke-linejoin:round; stroke-linecap:round; }
+      .olthin { stroke:#141414; stroke-width:4; stroke-linejoin:round; stroke-linecap:round; }
+    </style>
+  </defs>
+
+  <!-- SKY -->
+  <rect x="0" y="0" width="1200" height="620" fill="url(#sky)"/>
+
+  <!-- CLOUDS -->
+  <g fill="#ffffff" class="ol6">
+    <g transform="translate(180,110)"><ellipse cx="0" cy="0" rx="60" ry="34"/><ellipse cx="55" cy="8" rx="46" ry="28"/><ellipse cx="-52" cy="10" rx="42" ry="26"/></g>
+    <g transform="translate(1000,120)"><ellipse cx="0" cy="0" rx="64" ry="36"/><ellipse cx="58" cy="10" rx="46" ry="28"/><ellipse cx="-56" cy="12" rx="44" ry="26"/></g>
+  </g>
+
+  <!-- STADIUM STAND -->
+  <rect x="0" y="360" width="1200" height="270" fill="#7c8aa0" class="ol6"/>
+  <rect x="0" y="360" width="1200" height="26" fill="#5f6d82"/>
+  <!-- crowd dots -->
+  <g>
+    <!-- generated rows of tiny fans in red/green/white -->
+    <g fill="#e23b4e"><circle cx="40" cy="420" r="9"/><circle cx="150" cy="430" r="9"/><circle cx="300" cy="415" r="9"/><circle cx="470" cy="435" r="9"/><circle cx="720" cy="420" r="9"/><circle cx="900" cy="430" r="9"/><circle cx="1080" cy="418" r="9"/><circle cx="230" cy="470" r="9"/><circle cx="560" cy="475" r="9"/><circle cx="840" cy="468" r="9"/><circle cx="1010" cy="478" r="9"/><circle cx="110" cy="520" r="9"/><circle cx="410" cy="525" r="9"/><circle cx="660" cy="518" r="9"/><circle cx="950" cy="528" r="9"/></g>
+    <g fill="#2f9e44"><circle cx="95" cy="418" r="9"/><circle cx="220" cy="428" r="9"/><circle cx="380" cy="422" r="9"/><circle cx="620" cy="430" r="9"/><circle cx="800" cy="416" r="9"/><circle cx="990" cy="426" r="9"/><circle cx="1140" cy="420" r="9"/><circle cx="310" cy="472" r="9"/><circle cx="640" cy="470" r="9"/><circle cx="915" cy="474" r="9"/><circle cx="60" cy="522" r="9"/><circle cx="500" cy="520" r="9"/><circle cx="760" cy="524" r="9"/><circle cx="1060" cy="520" r="9"/></g>
+    <g fill="#ffffff"><circle cx="70" cy="470" r="9"/><circle cx="180" cy="522" r="9"/><circle cx="360" cy="470" r="9"/><circle cx="540" cy="420" r="9"/><circle cx="690" cy="472" r="9"/><circle cx="870" cy="520" r="9"/><circle cx="1030" cy="470" r="9"/><circle cx="440" cy="470" r="9"/><circle cx="1120" cy="472" r="9"/><circle cx="250" cy="520" r="9"/><circle cx="600" cy="522" r="9"/><circle cx="1000" cy="576" r="9"/><circle cx="330" cy="576" r="9"/><circle cx="720" cy="576" r="9"/></g>
+    <g fill="#f2c744"><circle cx="130" cy="470" r="9"/><circle cx="470" cy="576" r="9"/><circle cx="150" cy="576" r="9"/><circle cx="820" cy="470" r="9"/><circle cx="560" cy="576" r="9"/><circle cx="890" cy="576" r="9"/><circle cx="1090" cy="576" r="9"/></g>
+  </g>
+  <!-- little Portugal flags in the crowd -->
+  <g class="olthin">
+    <g transform="translate(255,395)"><rect x="0" y="0" width="2.5" height="34" fill="#141414"/><path d="M2,0 h26 v18 h-26 z" fill="#2f9e44"/><path d="M14,0 h14 v18 h-14 z" fill="#e23b4e"/></g>
+    <g transform="translate(730,395)"><rect x="0" y="0" width="2.5" height="34" fill="#141414"/><path d="M2,0 h26 v18 h-26 z" fill="#2f9e44"/><path d="M14,0 h14 v18 h-14 z" fill="#e23b4e"/></g>
+    <g transform="translate(1005,395)"><rect x="0" y="0" width="2.5" height="34" fill="#141414"/><path d="M2,0 h26 v18 h-26 z" fill="#2f9e44"/><path d="M14,0 h14 v18 h-14 z" fill="#e23b4e"/></g>
+  </g>
+
+  <!-- PITCH -->
+  <rect x="0" y="560" width="1200" height="336" fill="url(#pitch)" class="ol6"/>
+  <g fill="#4fb954" opacity="0.55">
+    <rect x="0" y="600" width="1200" height="46"/>
+    <rect x="0" y="700" width="1200" height="46"/>
+    <rect x="0" y="800" width="1200" height="46"/>
+  </g>
+  <line x1="0" y1="560" x2="1200" y2="560" stroke="#141414" stroke-width="6"/>
+
+  <!-- ===================== CHIBI RONALDO ===================== -->
+  <g>
+    <!-- soft shadow -->
+    <ellipse cx="600" cy="838" rx="185" ry="30" fill="#1f7a2b" opacity="0.35"/>
+
+    <!-- BOOTS -->
+    <path d="M497,782 q-6,34 4,44 q10,10 58,6 q22,-2 22,-22 v-30 z" fill="#161616" class="ol"/>
+    <path d="M703,782 q6,34 -4,44 q-10,10 -58,6 q-22,-2 -22,-22 v-30 z" fill="#161616" class="ol"/>
+    <path d="M497,824 q28,10 84,8" fill="none" class="olthin" stroke="#ffffff"/>
+    <path d="M703,824 q-28,10 -84,8" fill="none" class="olthin" stroke="#ffffff"/>
+
+    <!-- SOCKS (red) -->
+    <rect x="512" y="726" width="66" height="66" rx="18" fill="#d8283c" class="ol"/>
+    <rect x="622" y="726" width="66" height="66" rx="18" fill="#d8283c" class="ol"/>
+    <rect x="512" y="734" width="66" height="12" fill="#12351f"/>
+    <rect x="622" y="734" width="66" height="12" fill="#12351f"/>
+
+    <!-- LEGS (skin) -->
+    <rect x="516" y="672" width="58" height="70" rx="20" fill="#e9b587" class="ol"/>
+    <rect x="626" y="672" width="58" height="70" rx="20" fill="#e9b587" class="ol"/>
+
+    <!-- SHORTS (dark green) -->
+    <path d="M486,596 h228 q18,0 18,20 v52 q0,20 -20,20 h-70 q-12,0 -12,-14 v-10 q0,-8 -8,-8 h-16 q-8,0 -8,8 v10 q0,14 -12,14 h-70 q-20,0 -20,-20 v-52 q0,-20 18,-20 z" fill="#14532d" class="ol"/>
+    <path d="M600,624 v42" fill="none" stroke="#0c3a1e" stroke-width="6"/>
+
+    <!-- JERSEY (maroon) with short sleeves -->
+    <path d="M470,470 q0,-40 46,-52 l84,-18 l84,18 q46,12 46,52 v104 q0,26 -26,26 h-208 q-26,0 -26,-26 z" fill="#7a1f2b" class="ol"/>
+    <!-- gold side trim -->
+    <path d="M486,430 v150" fill="none" stroke="#f2c744" stroke-width="6"/>
+    <path d="M714,430 v150" fill="none" stroke="#f2c744" stroke-width="6"/>
+    <!-- collar (green V) -->
+    <path d="M556,404 l44,40 l44,-40" fill="none" stroke="#2f9e44" stroke-width="12" stroke-linejoin="round"/>
+    <path d="M556,404 l44,40 l44,-40" fill="none" class="olthin"/>
+
+    <!-- crossed arms: sleeves + forearms -->
+    <!-- left sleeve -->
+    <path d="M470,466 q-40,6 -46,52 q-4,30 26,40 l40,10 v-60 q0,-30 -20,-42 z" fill="#7a1f2b" class="ol"/>
+    <!-- right sleeve -->
+    <path d="M730,466 q40,6 46,52 q4,30 -26,40 l-40,10 v-60 q0,-30 20,-42 z" fill="#7a1f2b" class="ol"/>
+    <rect x="452" y="556" width="60" height="18" rx="9" fill="#2f9e44" class="olthin"/>
+    <rect x="688" y="556" width="60" height="18" rx="9" fill="#2f9e44" class="olthin"/>
+    <!-- forearms crossed over chest -->
+    <path d="M470,556 q60,44 150,40 q30,-2 42,-16 q10,-10 -2,-20 q-70,10 -166,-30 q-24,10 -24,26 z" fill="#e9b587" class="ol"/>
+    <path d="M732,548 q-58,44 -150,44 q-24,0 -40,-12 q-12,-10 0,-20 q66,12 164,-34 q26,8 26,22 z" fill="#e7ad7d" class="ol"/>
+
+    <!-- number 7 -->
+    <path d="M556,486 h58 l-30,66 h-22 l28,-58 h-32 z" fill="#f6efe0" class="olthin"/>
+
+    <!-- captain / armband -->
+    <rect x="476" y="500" width="34" height="26" rx="6" fill="#f2c744" class="olthin"/>
+
+    <!-- NECK -->
+    <rect x="574" y="376" width="52" height="46" fill="#e9b587" class="ol"/>
+
+    <!-- HEAD -->
+    <ellipse cx="600" cy="256" rx="156" ry="162" fill="#eebb8c" class="ol"/>
+    <!-- ears -->
+    <ellipse cx="450" cy="268" rx="24" ry="32" fill="#eebb8c" class="ol"/>
+    <ellipse cx="750" cy="268" rx="24" ry="32" fill="#eebb8c" class="ol"/>
+
+    <!-- jaw shading / chiseled hint -->
+    <path d="M512,330 q88,66 176,0" fill="none" stroke="#d99a6a" stroke-width="7" opacity="0.7"/>
+
+    <!-- HAIR (spiky dark brown) -->
+    <path d="M452,214
+             q-6,-70 60,-104
+             q-30,26 -14,40
+             q22,-40 66,-46
+             q-16,22 2,30
+             q26,-42 68,-40
+             q-14,20 4,30
+             q30,-40 74,-24
+             q-18,14 -6,28
+             q40,-20 62,20
+             q22,40 -4,78
+             q10,-58 -40,-72
+             q10,26 -6,40
+             q-20,-40 -66,-46
+             q10,24 -6,34
+             q-26,-40 -70,-40
+             q10,24 -8,34
+             q-28,-42 -74,-30
+             q10,22 -8,30
+             q-40,-16 -58,24
+             q-14,30 2,64 z" fill="#2e2016" class="ol"/>
+    <!-- side burns -->
+    <path d="M456,256 q-8,40 12,66 q14,-30 8,-66 z" fill="#2e2016" class="ol6"/>
+    <path d="M744,256 q8,40 -12,66 q-14,-30 -8,-66 z" fill="#2e2016" class="ol6"/>
+
+    <!-- EYEBROWS (right one raised = cheeky) -->
+    <path d="M508,214 q34,-16 66,-2" fill="none" stroke="#2e2016" stroke-width="12" stroke-linecap="round"/>
+    <path d="M628,198 q34,-14 66,2" fill="none" stroke="#2e2016" stroke-width="12" stroke-linecap="round"/>
+
+    <!-- EYES -->
+    <g>
+      <ellipse cx="542" cy="256" rx="30" ry="34" fill="#ffffff" class="olthin"/>
+      <ellipse cx="660" cy="252" rx="30" ry="34" fill="#ffffff" class="olthin"/>
+      <circle cx="548" cy="260" r="16" fill="#3a2415"/>
+      <circle cx="664" cy="256" r="16" fill="#3a2415"/>
+      <circle cx="543" cy="254" r="5" fill="#ffffff"/>
+      <circle cx="659" cy="250" r="5" fill="#ffffff"/>
+    </g>
+
+    <!-- NOSE -->
+    <path d="M598,268 q10,22 -6,34 q-8,6 4,10" fill="none" stroke="#c98a5c" stroke-width="6" stroke-linecap="round"/>
+
+    <!-- CHEEK blush -->
+    <ellipse cx="500" cy="306" rx="22" ry="13" fill="#f2a58a" opacity="0.55"/>
+    <ellipse cx="700" cy="302" rx="22" ry="13" fill="#f2a58a" opacity="0.55"/>
+
+    <!-- SMIRK (cheeky, asymmetric) -->
+    <path d="M544,344 q60,44 128,6 q-10,26 -66,26 q-48,0 -62,-32 z" fill="#7a2b2b" class="olthin"/>
+    <path d="M556,352 q52,30 104,4" fill="#ffffff"/>
+    <path d="M544,344 q60,44 128,6" fill="none" class="ol6"/>
+
+    <!-- light stubble on chin -->
+    <g fill="#2e2016" opacity="0.35">
+      <circle cx="580" cy="392" r="2.5"/><circle cx="596" cy="398" r="2.5"/><circle cx="612" cy="392" r="2.5"/><circle cx="628" cy="386" r="2.5"/><circle cx="564" cy="386" r="2.5"/>
+    </g>
+  </g>
+
+  <!-- FOOTBALL at feet -->
+  <g transform="translate(792,806)">
+    <circle cx="0" cy="0" r="46" fill="#ffffff" class="ol"/>
+    <path d="M0,-20 l19,14 -7,23 h-24 l-7,-23 z" fill="#141414"/>
+    <path d="M0,-46 l8,18 -8,8 -8,-8 z" fill="#141414"/>
+    <path d="M46,-6 l-16,8 2,12 16,-4 z" fill="#141414" opacity="0.9"/>
+    <path d="M-46,-6 l16,8 -2,12 -16,-4 z" fill="#141414" opacity="0.9"/>
+    <path d="M-22,40 l10,-14 12,0 10,14" fill="none" stroke="#141414" stroke-width="4"/>
+  </g>
+</svg>
