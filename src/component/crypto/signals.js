@@ -13,13 +13,45 @@ export const NEUTRAL = "neutral";
 
 const MA_PERIODS = [10, 20, 50, 100, 200];
 
-/* A price above its moving average is read as bullish, below it as bearish. */
-function maSignal(price, average) {
-  if (!Number.isFinite(price) || !Number.isFinite(average)) return NEUTRAL;
-  if (price > average) return BUY;
-  if (price < average) return SELL;
-  return NEUTRAL;
-}
+/* The conventions, as predicates. The live readings and the historical replay
+ * both go through these, so what is measured is always what is shown. */
+export const classify = {
+  movingAverage: (price, average) => {
+    if (!Number.isFinite(price) || !Number.isFinite(average)) return NEUTRAL;
+    if (price > average) return BUY;
+    if (price < average) return SELL;
+    return NEUTRAL;
+  },
+  rsi: (value) => (value === null ? NEUTRAL : value > 70 ? SELL : value < 30 ? BUY : NEUTRAL),
+  macdHistogram: (value, noise = 0) =>
+    value === null ? NEUTRAL : value > noise ? BUY : value < -noise ? SELL : NEUTRAL,
+  bollinger: (price, upper, lower) =>
+    upper === null || lower === null || !Number.isFinite(price)
+      ? NEUTRAL
+      : price > upper
+      ? SELL
+      : price < lower
+      ? BUY
+      : NEUTRAL,
+  roc: (value, noise = 0) =>
+    value === null ? NEUTRAL : value > noise ? BUY : value < -noise ? SELL : NEUTRAL,
+  stochastic: (value) => (value === null ? NEUTRAL : value > 80 ? SELL : value < 20 ? BUY : NEUTRAL),
+  williams: (value) => (value === null ? NEUTRAL : value > -20 ? SELL : value < -80 ? BUY : NEUTRAL),
+  cci: (value) => (value === null ? NEUTRAL : value > 100 ? SELL : value < -100 ? BUY : NEUTRAL),
+  obv: (current, previous) =>
+    !Number.isFinite(current) || !Number.isFinite(previous)
+      ? NEUTRAL
+      : current > previous
+      ? BUY
+      : current < previous
+      ? SELL
+      : NEUTRAL,
+};
+
+/* The scale below which a value is rounding noise rather than a direction. */
+export const noiseFloor = (price) => Math.abs(price) * 1e-9 || 1e-12;
+
+const maSignal = classify.movingAverage;
 
 /* Every reading is { label, value, signal, note }, and value is null when the
  * series has not warmed up over the range on screen. */
@@ -57,22 +89,21 @@ export function oscillatorRows({ closes, candles = [], volumes = [] }) {
   // a histogram of 1e-15 is a rounding artifact, not a direction. anything
   // smaller than this against the price is read as flat rather than as a
   // confident signal either way
-  const noise = Math.abs(price) * 1e-9 || 1e-12;
-  const sign = (value) => (value > noise ? BUY : value < -noise ? SELL : NEUTRAL);
+  const noise = noiseFloor(price);
 
   // overbought above 70, oversold below 30
   const rsiValue = last(rsi(closes, 14));
   rows.push({
     label: "RSI (14)",
     value: rsiValue,
-    signal: rsiValue === null ? NEUTRAL : rsiValue > 70 ? SELL : rsiValue < 30 ? BUY : NEUTRAL,
+    signal: classify.rsi(rsiValue),
     note: rsiValue === null ? "needs 15 points" : rsiValue > 70 ? "overbought" : rsiValue < 30 ? "oversold" : null,
   });
 
   // the histogram is the macd line against its signal line
   const macdValue = macd(closes);
   const histogram = last(macdValue.histogram);
-  const macdSignal = histogram === null ? NEUTRAL : sign(histogram);
+  const macdSignal = classify.macdHistogram(histogram, noise);
   rows.push({
     label: "MACD (12, 26, 9)",
     value: histogram,
@@ -93,8 +124,7 @@ export function oscillatorRows({ closes, candles = [], volumes = [] }) {
   rows.push({
     label: "Bollinger (20, 2)",
     value: price,
-    signal:
-      upper === null || lower === null ? NEUTRAL : price > upper ? SELL : price < lower ? BUY : NEUTRAL,
+    signal: classify.bollinger(price, upper, lower),
     note:
       upper === null ? "needs 20 points" : price > upper ? "above the upper band" : price < lower ? "below the lower band" : "inside the bands",
   });
@@ -103,7 +133,7 @@ export function oscillatorRows({ closes, candles = [], volumes = [] }) {
   rows.push({
     label: "ROC (12)",
     value: rocValue,
-    signal: rocValue === null ? NEUTRAL : sign(rocValue),
+    signal: classify.roc(rocValue, noise),
     note: rocValue === null ? "needs 13 points" : null,
   });
 
@@ -114,7 +144,7 @@ export function oscillatorRows({ closes, candles = [], volumes = [] }) {
     rows.push({
       label: "Stochastic %K (14)",
       value: k,
-      signal: k === null ? NEUTRAL : k > 80 ? SELL : k < 20 ? BUY : NEUTRAL,
+      signal: classify.stochastic(k),
       note: k === null ? "needs 14 candles" : k > 80 ? "overbought" : k < 20 ? "oversold" : null,
     });
 
@@ -123,7 +153,7 @@ export function oscillatorRows({ closes, candles = [], volumes = [] }) {
     rows.push({
       label: "Williams %R (14)",
       value: wr,
-      signal: wr === null ? NEUTRAL : wr > -20 ? SELL : wr < -80 ? BUY : NEUTRAL,
+      signal: classify.williams(wr),
       note: wr === null ? "needs 14 candles" : wr > -20 ? "overbought" : wr < -80 ? "oversold" : null,
     });
 
@@ -131,7 +161,7 @@ export function oscillatorRows({ closes, candles = [], volumes = [] }) {
     rows.push({
       label: "CCI (20)",
       value: cciValue,
-      signal: cciValue === null ? NEUTRAL : cciValue > 100 ? SELL : cciValue < -100 ? BUY : NEUTRAL,
+      signal: classify.cci(cciValue),
       note:
         cciValue === null ? "needs 20 candles" : cciValue > 100 ? "overbought" : cciValue < -100 ? "oversold" : null,
     });
@@ -154,14 +184,7 @@ export function oscillatorRows({ closes, candles = [], volumes = [] }) {
     rows.push({
       label: "OBV",
       value: current,
-      signal:
-        !Number.isFinite(current) || !Number.isFinite(previous)
-          ? NEUTRAL
-          : current > previous
-          ? BUY
-          : current < previous
-          ? SELL
-          : NEUTRAL,
+      signal: classify.obv(current, previous),
       note: "volume flow",
     });
   }

@@ -32,6 +32,37 @@ Two things worth knowing about what the numbers mean:
   SMA 200 has nothing to work with, and the panel says so rather than showing a
   number computed from too little data.
 
+### What followed these signals before
+
+Under the analysis panel is a replay of the same indicators over the history on
+screen. For each signal that is firing now, it counts how often price was
+higher a chosen number of bars later, by how much on average, and how that
+compares with the base rate over every bar in the range.
+
+It is not a forecast, and the code is built to avoid the ways a backtest
+usually flatters itself:
+
+- **No lookahead.** Every indicator value at a bar depends only on the bars up
+  to it, and the outcome measured is strictly after it. There is a test that
+  truncates the series and asserts each indicator reads the same at that bar
+  with and without the later data.
+- **A base rate beside every row.** A signal followed by a rise 60% of the time
+  in a range that rose 60% of the time anyway has said nothing. The edge column
+  is the difference, and only that difference is counted.
+- **Outcome over label.** A reading conventionally called bearish that was
+  followed by rises more often than the base rate counts as evidence for a
+  rise. Scoring it by its name instead would invert the whole table whenever an
+  indicator has been contrarian on that coin.
+- **Sample sizes on show.** Rows with fewer than a dozen past occurrences are
+  marked and excluded from the overall reading, and a range too short for the
+  horizon reports nothing at all rather than a thin number.
+- **One grid.** The replay runs entirely on the candles when there are enough
+  of them, or entirely on the price points otherwise, never a mix of the two.
+
+What it still cannot account for: the samples overlap, so they are not
+independent; it is one coin over one range, chosen after the fact; and there
+are no fees, spread or slippage in the numbers.
+
 ### Checking the maths
 
 The indicators in `src/component/crypto/indicators.js` are covered two ways.

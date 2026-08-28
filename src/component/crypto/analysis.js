@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PriceChart from "./pricechart";
 import IndicatorPanel from "./indicatorpanel";
+import SignalHistory from "./history";
 import { sma, ema, rsi, macd, bollinger } from "./indicators";
 import { movingAverageRows, oscillatorRows, summarise, BUY, SELL } from "./signals";
 import { formatPrice, formatNumber } from "./format";
@@ -139,6 +140,25 @@ const Analysis = ({ series = [], candles = [], volumes = [], currency = "usd" })
         {table("moving averages", maRows)}
         {table("oscillators", oscRows)}
       </div>
+
+      {/* the replay runs on one grid, never a mix of two. the candles carry a
+          close as well as a high and a low, so when there are enough of them
+          they are the better source: every indicator is then measured on the
+          same bars. otherwise it falls back to the price points, without the
+          readings that need a high and a low. */}
+      {candles.length >= 60 ? (
+        <SignalHistory
+          closes={candles.map((c) => c.close)}
+          candles={candles}
+          pointLabel="candles"
+        />
+      ) : (
+        <SignalHistory
+          closes={closes}
+          volumes={volumeValues.length === closes.length ? volumeValues : []}
+          pointLabel="points"
+        />
+      )}
 
       <p className="text-muted">
         <small>
