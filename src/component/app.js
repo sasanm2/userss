@@ -9,6 +9,8 @@ import Dashboard from './users/dashboard';
 import Login from './users/login';
 import Notfound from './users/notfound';
 import Logout from "./users/logout";
+import CryptoList from "./crypto/cryptolist";
+import CryptoDetail from "./crypto/cryptodetail";
 
 
 export default function App() {
@@ -43,6 +45,8 @@ export default function App() {
        <Route path="/logout" element={<Logout/>}/>
        <Route path="/not-found" element={<Notfound />}/>
        <Route path="/users/:id" element={<Dashboard />}/>
+       <Route path="/crypto" element={<CryptoList />}/>
+       <Route path="/crypto/:id" element={<CryptoDetail />}/>
        <Route path="/" element={<Home />}/>
        <Route path="/about" element={<About />}/>
        <Route path="*" element={<Navigate replace to="/not-found"/> } />

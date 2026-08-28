@@ -1,0 +1,12 @@
+/* dark app bar, it sits above both the light pages and the dark crypto pages */
+.app-navbar {
+  background-color: #151a22;
+  border-bottom: 1px solid #232935;
+}
+
+/* the link colour is an inline style, so only !important can win the hover.
+   the active link is left out so it keeps its red instead of going white */
+.app-navbar .nav-link:not(.active):hover,
+.app-navbar .navbar-brand:not(.active):hover {
+  color: #ffffff !important;
+}
