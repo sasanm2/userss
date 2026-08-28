@@ -26,7 +26,8 @@
     "dev": "npm run server & npm start",
     "android:sync": "npm run build && npx cap sync android",
     "android:apk": "npm run android:sync && cd android && ./gradlew assembleDebug",
-    "android:open": "npm run android:sync && npx cap open android"
+    "android:open": "npm run android:sync && npx cap open android",
+    "postbuild": "node -e \"require('fs').copyFileSync('build/index.html','build/404.html')\""
   },
   "eslintConfig": {
     "extends": [

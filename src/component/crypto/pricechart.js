@@ -39,9 +39,10 @@ const PriceChart = ({ series = [], currency = "usd" }) => {
   // five evenly spaced price labels down the right hand side
   const ticks = [0, 1, 2, 3, 4].map((step) => min + (range / 4) * step);
 
-  const handleMove = (event) => {
-    const box = event.currentTarget.getBoundingClientRect();
-    const ratio = (event.clientX - box.left) / box.width;
+  // works for both a mouse and a finger, since the phone build has no hover
+  const readAt = (clientX, target) => {
+    const box = target.getBoundingClientRect();
+    const ratio = (clientX - box.left) / box.width;
     const wanted = firstTime + ((ratio * WIDTH - PADDING.left) / plotWidth) * timeRange;
     let closest = series[0];
     series.forEach((point) => {
@@ -52,13 +53,24 @@ const PriceChart = ({ series = [], currency = "usd" }) => {
     setHover(closest);
   };
 
+  const handleMove = (event) => readAt(event.clientX, event.currentTarget);
+  const handleTouch = (event) => {
+    const touch = event.touches[0];
+    if (touch) readAt(touch.clientX, event.currentTarget);
+  };
+
   return (
     <div>
+      {/* pan-y keeps the page scrolling vertically while a sideways drag
+          scrubs the chart */}
       <svg
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-        style={{ width: "100%", height: "auto" }}
+        style={{ width: "100%", height: "auto", touchAction: "pan-y" }}
         onMouseMove={handleMove}
         onMouseLeave={() => setHover(null)}
+        onTouchStart={handleTouch}
+        onTouchMove={handleTouch}
+        onTouchEnd={() => setHover(null)}
       >
         <defs>
           <linearGradient id="chartfill" x1="0" y1="0" x2="0" y2="1">
@@ -127,7 +139,7 @@ const PriceChart = ({ series = [], currency = "usd" }) => {
       <div className="text-center text-muted" style={{ minHeight: "24px" }}>
         {hover
           ? `${new Date(hover[0]).toLocaleString()} — ${formatPrice(hover[1], currency)}`
-          : "hover the chart to read a price"}
+          : "drag across the chart to read a price"}
       </div>
     </div>
   );
