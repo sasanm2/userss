@@ -128,3 +128,32 @@
 .crypto-dark .crypto-chart-cursor {
   stroke: #6b7280;
 }
+
+/* on a phone the eleven column table does not fit, so everything but rank,
+   coin, price and the 24h move is dropped rather than left to scroll sideways */
+@media (max-width: 720px) {
+  .crypto-dark .table th:nth-child(4),
+  .crypto-dark .table td:nth-child(4),
+  .crypto-dark .table th:nth-child(6),
+  .crypto-dark .table td:nth-child(6),
+  .crypto-dark .table th:nth-child(7),
+  .crypto-dark .table td:nth-child(7),
+  .crypto-dark .table th:nth-child(8),
+  .crypto-dark .table td:nth-child(8),
+  .crypto-dark .table th:nth-child(9),
+  .crypto-dark .table td:nth-child(9),
+  .crypto-dark .table th:nth-child(10),
+  .crypto-dark .table td:nth-child(10),
+  .crypto-dark .table th:nth-child(11),
+  .crypto-dark .table td:nth-child(11) {
+    display: none;
+  }
+
+  .crypto-dark {
+    padding: 0.75rem !important;
+  }
+
+  .crypto-dark h2 {
+    font-size: 1.4rem;
+  }
+}

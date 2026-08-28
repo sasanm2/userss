@@ -2,10 +2,12 @@ import axios from "axios";
 
 const BASE_URL = "https://api.coingecko.com/api/v3";
 
-// the free coingecko api is rate limited, so we keep every response for a while
-// and hand the cached copy back instead of asking again
+// the free coingecko api is rate limited, so we keep every response for a
+// short while and hand the cached copy back instead of asking again. the
+// window has to stay under the fastest refresh the list offers, otherwise a
+// poll would only ever see the cached copy
 const cache = new Map();
-const CACHE_TIME = 60 * 1000;
+const CACHE_TIME = 900;
 
 async function get(url, params) {
   const key = url + JSON.stringify(params);
@@ -16,6 +18,12 @@ async function get(url, params) {
   const response = await axios.get(`${BASE_URL}${url}`, { params });
   cache.set(key, { time: Date.now(), data: response.data });
   return response.data;
+}
+
+// coingecko answers 429 once we ask too often, which the ui reports as a
+// throttle rather than as a general failure
+export function isRateLimited(error) {
+  return Boolean(error && error.response && error.response.status === 429);
 }
 
 // the whole top 100 list with 7d sparkline points and every change percentage

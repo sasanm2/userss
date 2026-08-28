@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Sparkline from "./sparkline";
 import CoinLogo from "./coinlogo";
 import LoadingCrypto from "../loading/loadingcrypto";
-import { getTopCoins, getGlobal } from "./cryptoapi";
+import { getTopCoins, getGlobal, isRateLimited } from "./cryptoapi";
 import {
   CURRENCIES,
   formatPrice,
@@ -13,6 +13,19 @@ import {
   percentClass,
 } from "./format";
 import "./crypto.css";
+
+// how often the list re-asks the api. the fast options are there for watching
+// a move, but the free api only allows a handful of calls a minute, so they
+// will start coming back throttled
+const INTERVALS = [
+  { ms: 1000, label: "1s" },
+  { ms: 5000, label: "5s" },
+  { ms: 10000, label: "10s" },
+  { ms: 30000, label: "30s" },
+  { ms: 60000, label: "60s" },
+];
+
+const STORED_INTERVAL = "crypto-refresh";
 
 const SORTS = [
   { key: "market_cap_rank", label: "#" },
@@ -35,32 +48,51 @@ const CryptoList = () => {
   const [currency, setCurrency] = useState("usd");
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState({ key: "market_cap_rank", direction: "asc" });
+  const [throttled, setThrottled] = useState(false);
+  const [updated, setUpdated] = useState(null);
+  const [interval, setRefresh] = useState(() => {
+    const saved = Number(localStorage.getItem(STORED_INTERVAL));
+    return INTERVALS.some((item) => item.ms === saved) ? saved : 10000;
+  });
 
   useEffect(() => {
     let cancelled = false;
 
     async function fetchdata() {
-      setIsLoading(true);
-      setError(null);
       try {
         const [markets, stats] = await Promise.all([getTopCoins(currency, 100, 1), getGlobal()]);
         if (cancelled) return;
         setCoins(markets);
         setGlobal(stats.data);
+        setUpdated(new Date());
+        setError(null);
+        setThrottled(false);
       } catch (err) {
-        if (!cancelled) setError("could not load the market data, the api is probably rate limiting us");
+        if (cancelled) return;
+        // a throttle keeps whatever prices we already have on screen, only a
+        // failure with nothing to show becomes an error
+        if (isRateLimited(err)) {
+          setThrottled(true);
+        } else {
+          setError("could not load the market data, the api is probably rate limiting us");
+        }
       }
       if (!cancelled) setIsLoading(false);
     }
 
     fetchdata();
     // keep the prices moving without a manual reload
-    const timer = setInterval(fetchdata, 60000);
+    const timer = setInterval(fetchdata, interval);
     return () => {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [currency]);
+  }, [currency, interval]);
+
+  const handlerefresh = (ms) => {
+    setRefresh(ms);
+    localStorage.setItem(STORED_INTERVAL, String(ms));
+  };
 
   const handlesort = (key) => {
     if (sort.key === key) {
@@ -135,6 +167,35 @@ const CryptoList = () => {
         </div>
       )}
 
+      <div className="row align-items-center mb-3">
+        <div className="col-auto d-flex align-items-center">
+          <small className="text-muted me-2">refresh</small>
+          <div className="btn-group btn-group-sm">
+            {INTERVALS.map((item) => (
+              <button
+                key={item.ms}
+                onClick={() => handlerefresh(item.ms)}
+                className={`btn btn-sm ${interval === item.ms ? "btn-info" : "btn-outline-info"}`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="col">
+          <small className="text-muted">
+            {updated ? `updated ${updated.toLocaleTimeString()}` : "waiting for the first prices"}
+          </small>
+        </div>
+      </div>
+
+      {throttled && (
+        <div className="alert alert-warning">
+          the api is throttling us at this refresh rate, the prices below are the last ones it
+          returned. pick a slower refresh to keep them moving
+        </div>
+      )}
+
       {error && <div className="alert alert-danger">{error}</div>}
 
       {isloading ? (
@@ -200,7 +261,7 @@ const CryptoList = () => {
       )}
 
       <p className="text-muted text-center mt-3">
-        data from coingecko, refreshed every minute
+        data from coingecko
       </p>
     </div>
   );
