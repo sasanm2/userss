@@ -101,6 +101,15 @@ export function getCoinChart(id, currency = "usd", days = 30) {
   });
 }
 
+// candles, needed by the indicators that read a high and a low rather than
+// just a close. coingecko picks the candle size from the range asked for
+export function getCoinOhlc(id, currency = "usd", days = 30) {
+  return get(`/coins/${id}/ohlc`, {
+    vs_currency: currency,
+    days: days,
+  });
+}
+
 export function getGlobal() {
   return get("/global");
 }

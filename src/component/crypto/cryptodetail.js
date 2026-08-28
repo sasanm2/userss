@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import PriceChart from "./pricechart";
 import LoadingCrypto from "../loading/loadingcrypto";
 import CoinLogo from "./coinlogo";
-import { getCoin, getCoinChart } from "./cryptoapi";
+import Analysis from "./analysis";
+import { getCoin, getCoinChart, getCoinOhlc } from "./cryptoapi";
 import {
   CURRENCIES,
   formatPrice,
@@ -38,6 +39,9 @@ const CryptoDetail = () => {
   const navigate = useNavigate();
   const [coin, setCoin] = useState(null);
   const [series, setSeries] = useState([]);
+  const [volumes, setVolumes] = useState([]);
+  const [candles, setCandles] = useState([]);
+  const [showAnalysis, setShowAnalysis] = useState(false);
   const [isloading, setIsLoading] = useState(true);
   const [chartloading, setChartLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -73,9 +77,15 @@ const CryptoDetail = () => {
       setChartLoading(true);
       try {
         const data = await getCoinChart(id, currency, days);
-        if (!cancelled) setSeries(data.prices || []);
+        if (!cancelled) {
+          setSeries(data.prices || []);
+          setVolumes(data.total_volumes || []);
+        }
       } catch (err) {
-        if (!cancelled) setSeries([]);
+        if (!cancelled) {
+          setSeries([]);
+          setVolumes([]);
+        }
       }
       if (!cancelled) setChartLoading(false);
     }
@@ -84,6 +94,31 @@ const CryptoDetail = () => {
       cancelled = true;
     };
   }, [id, currency, days]);
+
+  // the high and low the stochastic, williams %r, cci and atr need. only the
+  // analysis panel uses these, so this is fetched separately and its failure
+  // leaves the rest of the page alone
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchcandles() {
+      try {
+        const raw = await getCoinOhlc(id, currency, days);
+        const parsed = (raw || [])
+          .filter((row) => Array.isArray(row) && row.length >= 5)
+          .map((row) => ({ time: row[0], open: row[1], high: row[2], low: row[3], close: row[4] }))
+          .filter((c) => Number.isFinite(c.high) && Number.isFinite(c.low) && Number.isFinite(c.close));
+        if (!cancelled) setCandles(parsed);
+      } catch (err) {
+        if (!cancelled) setCandles([]);
+      }
+    }
+
+    if (showAnalysis) fetchcandles();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, currency, days, showAnalysis]);
 
   if (isloading) {
     return (
@@ -159,7 +194,20 @@ const CryptoDetail = () => {
         ))}
       </div>
 
-      {chartloading ? <LoadingCrypto rows={4} /> : <PriceChart series={series} currency={currency} />}
+      {chartloading ? (
+        <LoadingCrypto rows={4} />
+      ) : showAnalysis ? (
+        <Analysis series={series} candles={candles} volumes={volumes} currency={currency} />
+      ) : (
+        <PriceChart series={series} currency={currency} />
+      )}
+
+      <button
+        onClick={() => setShowAnalysis(!showAnalysis)}
+        className={`btn btn-sm mt-2 ${showAnalysis ? "btn-info" : "btn-outline-info"}`}
+      >
+        {showAnalysis ? "hide technical analysis" : "show technical analysis"}
+      </button>
 
       <h4 className="mt-4">market data</h4>
       <div className="row">

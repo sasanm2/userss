@@ -4,6 +4,54 @@ A create react app project with a crypto section at `/crypto`: the top 100
 coins with prices, changes, sparklines and charts, and a detail page per coin.
 It installs on android as a PWA, so it can live on the home screen.
 
+## Technical analysis
+
+The coin page has a technical analysis panel behind a toggle. It computes,
+over whatever range is selected:
+
+- moving averages: SMA and EMA over 10, 20, 50, 100 and 200 periods
+- RSI (14), with Wilder's smoothing
+- MACD (12, 26, 9), line, signal and histogram
+- Bollinger bands (20, 2), on a population standard deviation
+- rate of change (12)
+- stochastic %K and %D (14, 3), Williams %R (14), CCI (20) and ATR (14),
+  which need a high and a low and so read the ohlc candles
+- on balance volume
+
+Each reading is shown with its conventional interpretation and counted into an
+overall summary. They describe what the indicators say over the range on
+screen; they are not advice and not a forecast.
+
+Two things worth knowing about what the numbers mean:
+
+- A period is one point of whichever series the indicator reads, and the two
+  series are not on the same clock. The price based indicators run over the
+  market chart points, the candle based ones over the ohlc candles, and the api
+  chooses a different granularity for each depending on the range.
+- The longer averages need enough history to exist at all. Over a 24h range an
+  SMA 200 has nothing to work with, and the panel says so rather than showing a
+  number computed from too little data.
+
+### Checking the maths
+
+The indicators in `src/component/crypto/indicators.js` are covered two ways.
+`src/component/crypto/indicators.test.js` asserts hand computable values and
+the edge cases: the exact Wilder RSI from a worked example, a set whose
+population standard deviation is exactly 2, a gap up that only true range
+catches, and so on.
+
+On top of that, `npm run verify:indicators` computes every series a second
+time in python, from the textbook formulas, and compares the two
+implementations point by point over a 240 point series:
+
+```
+npm run verify:indicators
+```
+
+Every series must agree to within floating point noise. The python is
+deliberately written in a different style from the javascript so that a typo
+is unlikely to be mirrored in both.
+
 ## The CoinGecko api key
 
 The app works with no key, on the free allowance. That allowance is only a

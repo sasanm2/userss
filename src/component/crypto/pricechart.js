@@ -5,8 +5,13 @@ const WIDTH = 900;
 const HEIGHT = 320;
 const PADDING = { top: 20, right: 70, bottom: 30, left: 10 };
 
-// series is the [timestamp, price] shape coingecko returns for market_chart
-const PriceChart = ({ series: given = [], currency = "usd" }) => {
+/* series is the [timestamp, price] shape coingecko returns for market_chart.
+ *
+ * overlays are drawn over the same axes, each one { points, color, label,
+ * dashed }, where points is also [timestamp, value]. They are matched to the
+ * price line by timestamp rather than by index, so a dropped price point
+ * cannot slide an overlay out of alignment. */
+const PriceChart = ({ series: given = [], currency = "usd", overlays = [] }) => {
   const [hover, setHover] = useState(null);
 
   // a single null price would make every coordinate NaN, so bad points go
@@ -18,9 +23,18 @@ const PriceChart = ({ series: given = [], currency = "usd" }) => {
     return <p className="text-muted">no chart data</p>;
   }
 
+  const clean = (points) =>
+    (points || []).filter(
+      (point) => Array.isArray(point) && Number.isFinite(point[0]) && Number.isFinite(point[1])
+    );
+  const drawn = overlays.map((overlay) => ({ ...overlay, points: clean(overlay.points) }));
+
   const prices = series.map((point) => point[1]);
-  const min = Math.min(...prices);
-  const max = Math.max(...prices);
+  // the bands sit outside the price range, so the scale has to include them or
+  // they would be drawn off the top and bottom of the chart
+  const spread = drawn.flatMap((overlay) => overlay.points.map((point) => point[1]));
+  const min = Math.min(...prices, ...spread);
+  const max = Math.max(...prices, ...spread);
   const range = max - min || 1;
   const firstTime = series[0][0];
   const lastTime = series[series.length - 1][0];
@@ -110,6 +124,20 @@ const PriceChart = ({ series: given = [], currency = "usd" }) => {
         <path d={area} fill="url(#chartfill)" />
         <path d={line} fill="none" stroke={color} strokeWidth="2" />
 
+        {drawn.map((overlay) => (
+          <path
+            key={overlay.label}
+            d={overlay.points
+              .map((point, index) => `${index === 0 ? "M" : "L"}${x(point[0]).toFixed(2)} ${y(point[1]).toFixed(2)}`)
+              .join(" ")}
+            fill="none"
+            stroke={overlay.color}
+            strokeWidth="1.4"
+            strokeDasharray={overlay.dashed ? "5 4" : undefined}
+            opacity="0.9"
+          />
+        ))}
+
         {hover && (
           <g>
             <line
@@ -140,6 +168,16 @@ const PriceChart = ({ series: given = [], currency = "usd" }) => {
           {new Date(lastTime).toLocaleDateString()}
         </text>
       </svg>
+
+      {drawn.length > 0 && (
+        <div className="text-center mb-1">
+          {drawn.map((overlay) => (
+            <small key={overlay.label} className="me-3" style={{ color: overlay.color }}>
+              <span style={{ fontWeight: 600 }}>—</span> {overlay.label}
+            </small>
+          ))}
+        </div>
+      )}
 
       <div className="text-center text-muted" style={{ minHeight: "24px" }}>
         {hover

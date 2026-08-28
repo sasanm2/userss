@@ -31,6 +31,11 @@ const ROUTES = [
     ttl: 60000,
     params: ["vs_currency", "days", "interval"],
   },
+  {
+    match: /^\/coins\/[a-z0-9-]+\/ohlc$/,
+    ttl: 60000,
+    params: ["vs_currency", "days"],
+  },
   { match: /^\/global$/, ttl: 30000, params: [] },
 ];
 
