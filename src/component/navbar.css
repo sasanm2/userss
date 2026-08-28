@@ -1,0 +1,10 @@
+/* dark app bar, it sits above both the light pages and the dark crypto pages */
+.app-navbar {
+  background-color: #151a22;
+  border-bottom: 1px solid #232935;
+}
+
+.app-navbar .nav-link:hover,
+.app-navbar .navbar-brand:hover {
+  color: #ffffff !important;
+}
