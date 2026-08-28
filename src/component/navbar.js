@@ -24,6 +24,9 @@ const Navbar = () => {
           <NavLink style={({isActive})=>{return{color: isActive ? 'red' : 'black'}}} className="nav-link" to='/users'>users</NavLink>
         </li>
         <li className="nav-item">
+          <NavLink style={({isActive})=>{return{color: isActive ? 'red' : 'black'}}} className="nav-link" to='/crypto'>crypto</NavLink>
+        </li>
+        <li className="nav-item">
           <NavLink style={({isActive})=>{return{color: isActive ? 'red' : 'black'}}} className="nav-link" to="/about">about</NavLink>
         </li>
       </ul>
