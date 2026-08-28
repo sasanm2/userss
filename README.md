@@ -69,6 +69,50 @@ https://www.coingecko.com/en/developers/dashboard. The demo tier allows about
 30 calls a minute, which covers the 10s default comfortably but not a sustained
 1s refresh; that needs a paid tier.
 
+## Building the android apk
+
+The repo carries a capacitor android project in `android/`, so the app can be
+built into a real apk. The build itself needs the android sdk, which means it
+has to run on a machine that has it, not in this repo's ci.
+
+What you need once: [Android Studio](https://developer.android.com/studio),
+which brings the sdk and a jdk with it.
+
+Then, from the repo root:
+
+```
+npm install
+npm run android:apk
+```
+
+The apk lands at:
+
+```
+android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+Copy it to the phone and open it. Android will ask you to allow installing
+from that source, since a debug apk is not from the play store.
+
+`npm run android:open` does the same build steps and then opens the project in
+Android Studio instead, which is the easier route if you want to run it on an
+emulator, or produce a signed release apk (Build > Generate Signed Bundle or
+APK).
+
+Both scripts run `npm run build` and `npx cap sync android` first, so the apk
+always carries the current web build. Run them again after any change to the
+app.
+
+Notes on the native build:
+
+- The app id is `com.topcoins.app` and the name is "Top 100 Coins", both in
+  `capacitor.config.json`.
+- Inside the shell the app opens straight on the coin list, since a native
+  webview always loads at `/`.
+- The apk talks to coingecko directly, on the free allowance. To use a key
+  without shipping it in the apk, deploy the proxy and point
+  `REACT_APP_API_BASE` at its url before building.
+
 ## Installing on android
 
 Build and serve the app over https, then open it in chrome on the phone and

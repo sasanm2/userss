@@ -13,6 +13,14 @@ import CryptoList from "./crypto/cryptolist";
 import CryptoDetail from "./crypto/cryptodetail";
 
 
+// inside the android shell the app always loads at "/", so the coin list is
+// made the landing route there the way the pwa manifest does on the web
+const isNative = Boolean(
+  typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform
+    ? window.Capacitor.isNativePlatform()
+    : false
+);
+
 export default function App() {
   const[user,setUser] = useState(null);
 
@@ -47,7 +55,7 @@ export default function App() {
        <Route path="/users/:id" element={<Dashboard />}/>
        <Route path="/crypto" element={<CryptoList />}/>
        <Route path="/crypto/:id" element={<CryptoDetail />}/>
-       <Route path="/" element={<Home />}/>
+       <Route path="/" element={isNative ? <Navigate replace to="/crypto"/> : <Home />}/>
        <Route path="/about" element={<About />}/>
        <Route path="*" element={<Navigate replace to="/not-found"/> } />
        

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Top 100 Coins</string>
+    <string name="title_activity_main">Top 100 Coins</string>
+    <string name="package_name">com.topcoins.app</string>
+    <string name="custom_url_scheme">com.topcoins.app</string>
+</resources>

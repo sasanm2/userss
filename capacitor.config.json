@@ -1,0 +1,13 @@
+{
+  "appId": "com.topcoins.app",
+  "appName": "Top 100 Coins",
+  "webDir": "build",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#0f1218"
+  },
+  "server": {
+    "androidScheme": "https"
+  },
+  "backgroundColor": "#0f1218"
+}
