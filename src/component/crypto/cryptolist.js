@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Sparkline from "./sparkline";
 import CoinLogo from "./coinlogo";
 import LoadingCrypto from "../loading/loadingcrypto";
-import { getTopCoins, getGlobal, isRateLimited } from "./cryptoapi";
+import { getTopCoins, getGlobal, isRateLimited, hasKey } from "./cryptoapi";
 import {
   CURRENCIES,
   formatPrice,
@@ -55,15 +55,15 @@ const CryptoList = () => {
     return INTERVALS.some((item) => item.ms === saved) ? saved : 10000;
   });
 
+  // the prices poll at whatever rate is selected
   useEffect(() => {
     let cancelled = false;
 
     async function fetchdata() {
       try {
-        const [markets, stats] = await Promise.all([getTopCoins(currency, 100, 1), getGlobal()]);
+        const markets = await getTopCoins(currency, 100, 1);
         if (cancelled) return;
         setCoins(markets);
-        setGlobal(stats.data);
         setUpdated(new Date());
         setError(null);
         setThrottled(false);
@@ -88,6 +88,29 @@ const CryptoList = () => {
       clearInterval(timer);
     };
   }, [currency, interval]);
+
+  // the global totals barely move, so they keep their own slow timer instead
+  // of doubling the number of calls the fast refresh settings make
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchglobal() {
+      try {
+        const stats = await getGlobal();
+        if (!cancelled) setGlobal(stats.data);
+      } catch (err) {
+        // the prices are the point of the page, a missing header is not worth
+        // reporting
+      }
+    }
+
+    fetchglobal();
+    const timer = setInterval(fetchglobal, 60000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [currency]);
 
   const handlerefresh = (ms) => {
     setRefresh(ms);
@@ -188,6 +211,13 @@ const CryptoList = () => {
           </small>
         </div>
       </div>
+
+      {!hasKey && (interval <= 5000) && (
+        <div className="alert alert-secondary">
+          this fast a refresh needs a coingecko api key, otherwise the free allowance runs out
+          within a minute. set REACT_APP_COINGECKO_KEY to use one
+        </div>
+      )}
 
       {throttled && (
         <div className="alert alert-warning">

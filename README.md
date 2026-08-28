@@ -1,3 +1,40 @@
+# Top 100 Coins
+
+A create react app project with a crypto section at `/crypto`: the top 100
+coins with prices, changes, sparklines and charts, and a detail page per coin.
+It installs on android as a PWA, so it can live on the home screen.
+
+## The CoinGecko api key
+
+The app works with no key, on the free allowance. That allowance is only a
+handful of calls a minute, so the 1s and 5s refresh settings will be throttled
+without one.
+
+To use a key, copy `.env.example` to `.env.local` and set:
+
+```
+REACT_APP_COINGECKO_KEY=your_key_here
+REACT_APP_COINGECKO_PLAN=demo
+```
+
+A free demo key comes from https://www.coingecko.com/en/developers/dashboard.
+Set the plan to `pro` for a paid key, which switches the host and the header.
+Restart `npm start` after changing it, the value is read at build time.
+
+Rate limits, at the two calls a second this page can make: the demo tier
+allows about 30 calls a minute, which comfortably covers the 10s default but
+not 1s. Sustained 1s polling needs a paid tier.
+
+**The key is public.** Create react app inlines env values into the bundle, so
+anyone loading the site can read it out. Use a rotatable demo key, and put a
+backend in front of the api if it has to stay secret.
+
+## Installing on android
+
+Build and serve the app over https, then open it in chrome on the phone and
+use "Install app" from the menu. It opens on the coin list in its own window.
+https is required, chrome does not offer the install prompt over plain http.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
