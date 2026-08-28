@@ -1,0 +1,4 @@
+# every path is handled by the react router in the app, so any url that is not
+# a real file must still return index.html, otherwise a deep link like
+# /crypto/bitcoin 404s on a static host
+/*    /index.html   200
