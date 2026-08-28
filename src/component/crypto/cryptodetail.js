@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import PriceChart from "./pricechart";
 import LoadingCrypto from "../loading/loadingcrypto";
+import CoinLogo from "./coinlogo";
 import { getCoin, getCoinChart } from "./cryptoapi";
 import {
   CURRENCIES,
@@ -12,6 +13,7 @@ import {
   percentClass,
   formatDate,
 } from "./format";
+import "./crypto.css";
 
 const RANGES = [
   { days: 1, label: "24h" },
@@ -72,7 +74,7 @@ const CryptoDetail = () => {
 
   if (isloading) {
     return (
-      <div className="container p-4">
+      <div className="container-fluid p-4 crypto-dark">
         <LoadingCrypto rows={8} />
       </div>
     );
@@ -80,7 +82,7 @@ const CryptoDetail = () => {
 
   if (error || !coin) {
     return (
-      <div className="container p-4">
+      <div className="container-fluid p-4 crypto-dark">
         <div className="alert alert-danger">{error || "coin not found"}</div>
         <button onClick={() => navigate("/crypto")} className="btn btn-info btn-sm">
           back to the list
@@ -94,10 +96,12 @@ const CryptoDetail = () => {
   const change24 = market.price_change_percentage_24h_in_currency[currency];
 
   return (
-    <div className="container p-4">
+    <div className="container-fluid p-4 crypto-dark">
       <div className="row align-items-center mb-4">
         <div className="col-md-7 d-flex align-items-center">
-          <img src={coin.image.large} alt={coin.name} width="56" height="56" className="me-3" />
+          <span className="me-3">
+            <CoinLogo src={coin.image.large} symbol={coin.symbol} name={coin.name} size={56} />
+          </span>
           <div>
             <h2 className="mb-0">
               {coin.name} <span className="text-muted">{coin.symbol.toUpperCase()}</span>

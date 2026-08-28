@@ -74,10 +74,17 @@ const PriceChart = ({ series = [], currency = "usd" }) => {
               y1={y(tick)}
               x2={PADDING.left + plotWidth}
               y2={y(tick)}
+              className="crypto-chart-grid"
               stroke="#e9ecef"
               strokeWidth="1"
             />
-            <text x={PADDING.left + plotWidth + 8} y={y(tick) + 4} fontSize="12" fill="#6c757d">
+            <text
+              className="crypto-chart-label"
+              x={PADDING.left + plotWidth + 8}
+              y={y(tick) + 4}
+              fontSize="12"
+              fill="#6c757d"
+            >
               {formatPrice(tick, currency)}
             </text>
           </g>
@@ -93,6 +100,7 @@ const PriceChart = ({ series = [], currency = "usd" }) => {
               y1={PADDING.top}
               x2={x(hover[0])}
               y2={PADDING.top + plotHeight}
+              className="crypto-chart-cursor"
               stroke="#adb5bd"
               strokeWidth="1"
               strokeDasharray="4 4"
@@ -101,10 +109,17 @@ const PriceChart = ({ series = [], currency = "usd" }) => {
           </g>
         )}
 
-        <text x={PADDING.left} y={HEIGHT - 8} fontSize="12" fill="#6c757d">
+        <text className="crypto-chart-label" x={PADDING.left} y={HEIGHT - 8} fontSize="12" fill="#6c757d">
           {new Date(firstTime).toLocaleDateString()}
         </text>
-        <text x={PADDING.left + plotWidth} y={HEIGHT - 8} fontSize="12" fill="#6c757d" textAnchor="end">
+        <text
+          className="crypto-chart-label"
+          x={PADDING.left + plotWidth}
+          y={HEIGHT - 8}
+          fontSize="12"
+          fill="#6c757d"
+          textAnchor="end"
+        >
           {new Date(lastTime).toLocaleDateString()}
         </text>
       </svg>

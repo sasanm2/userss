@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Sparkline from "./sparkline";
+import CoinLogo from "./coinlogo";
 import LoadingCrypto from "../loading/loadingcrypto";
 import { getTopCoins, getGlobal } from "./cryptoapi";
 import {
@@ -11,6 +12,7 @@ import {
   formatPercent,
   percentClass,
 } from "./format";
+import "./crypto.css";
 
 const SORTS = [
   { key: "market_cap_rank", label: "#" },
@@ -82,7 +84,7 @@ const CryptoList = () => {
     });
 
   return (
-    <div className="container-fluid p-4">
+    <div className="container-fluid p-4 crypto-dark">
       <div className="row align-items-center mb-3">
         <div className="col-md-4">
           <h2 className="mb-0">top 100 coins</h2>
@@ -161,8 +163,10 @@ const CryptoList = () => {
                 <tr key={coin.id}>
                   <td>{coin.market_cap_rank}</td>
                   <td>
-                    <Link className="text-decoration-none text-dark" to={`/crypto/${coin.id}`}>
-                      <img src={coin.image} alt={coin.name} width="24" height="24" className="me-2" />
+                    <Link className="text-decoration-none" to={`/crypto/${coin.id}`}>
+                      <span className="me-2">
+                        <CoinLogo src={coin.image} symbol={coin.symbol} name={coin.name} size={24} />
+                      </span>
                       {coin.name} <span className="text-muted">{coin.symbol.toUpperCase()}</span>
                     </Link>
                   </td>
