@@ -35,6 +35,28 @@ does not recognise, and caches every answer briefly. That cache is shared by
 everyone using the server, so a hundred phones refreshing once a second still
 only cost about one upstream call a second.
 
+### On vercel
+
+`api/[...path].js` is the same proxy as a serverless function, so the app can
+be deployed to vercel with the key still server side.
+
+1. Import the repo in vercel. The build settings come from `vercel.json`.
+2. Add the environment variables in the project settings:
+   - `COINGECKO_KEY` = your key. Server side only, it is not exposed to the
+     browser, so do not give it a `REACT_APP_` name.
+   - `COINGECKO_PLAN` = `pro` if the key is a paid one, otherwise leave it out.
+   - `REACT_APP_API_BASE` = `/api`, so the app calls the function.
+3. Deploy. The function answers `/api/*` and `/api/healthz` reports whether a
+   key is configured.
+
+A serverless instance only keeps its cache while it stays warm, so the
+function also sets `s-maxage` on each answer and lets vercel's cdn hold the
+shared copy. The effect is the same: many visitors polling fast still cost
+about one upstream call per cache window.
+
+The endpoint allowlist and caching live in `api/_coingecko.js`, which both the
+function and `server/index.js` use, so the two deployments behave the same.
+
 ### Without the proxy (the key is public)
 
 Set `REACT_APP_COINGECKO_KEY` in `.env.local` and the browser calls coingecko
