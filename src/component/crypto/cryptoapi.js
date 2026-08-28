@@ -33,6 +33,9 @@ function headers() {
 // see the cached copy
 const cache = new Map();
 const CACHE_TIME = 900;
+// a long session on the fast refresh would otherwise keep every answer it has
+// ever seen; only a handful of urls are ever in play
+const CACHE_MAX = 40;
 
 async function get(url, params) {
   const key = url + JSON.stringify(params);
@@ -40,8 +43,23 @@ async function get(url, params) {
   if (hit && Date.now() - hit.time < CACHE_TIME) {
     return hit.data;
   }
+
+  // stamped with when the call went out, not when it came back, so a slow
+  // answer cannot pass itself off as fresher than a later one
+  const started = Date.now();
   const response = await axios.get(`${BASE_URL}${url}`, { params, headers: headers() });
-  cache.set(key, { time: Date.now(), data: response.data });
+
+  const current = cache.get(key);
+  if (current && current.time > started) {
+    // a newer call for the same thing already answered, so this one is stale
+    // and must not overwrite it in the cache
+    return current.data;
+  }
+
+  if (cache.size >= CACHE_MAX) {
+    cache.delete(cache.keys().next().value);
+  }
+  cache.set(key, { time: started, data: response.data });
   return response.data;
 }
 

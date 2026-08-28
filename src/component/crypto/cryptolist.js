@@ -51,18 +51,33 @@ const CryptoList = () => {
   const [throttled, setThrottled] = useState(false);
   const [updated, setUpdated] = useState(null);
   const [interval, setRefresh] = useState(() => {
-    const saved = Number(localStorage.getItem(STORED_INTERVAL));
-    return INTERVALS.some((item) => item.ms === saved) ? saved : 10000;
+    // reading storage throws in a private window or with site data blocked
+    try {
+      const saved = Number(localStorage.getItem(STORED_INTERVAL));
+      return INTERVALS.some((item) => item.ms === saved) ? saved : 10000;
+    } catch (err) {
+      return 10000;
+    }
   });
+
+  // the numbers on screen belong to the previous currency until the next poll
+  // answers, so they are cleared rather than relabelled
+  useEffect(() => {
+    setIsLoading(true);
+  }, [currency]);
 
   // the prices poll at whatever rate is selected
   useEffect(() => {
     let cancelled = false;
+    // at a one second refresh a slow answer can land after a newer one, and
+    // without this the older prices would overwrite the newer ones
+    let latest = 0;
 
     async function fetchdata() {
+      const ticket = ++latest;
       try {
         const markets = await getTopCoins(currency, 100, 1);
-        if (cancelled) return;
+        if (cancelled || ticket !== latest) return;
         setCoins(markets);
         setUpdated(new Date());
         setError(null);
@@ -114,7 +129,11 @@ const CryptoList = () => {
 
   const handlerefresh = (ms) => {
     setRefresh(ms);
-    localStorage.setItem(STORED_INTERVAL, String(ms));
+    try {
+      localStorage.setItem(STORED_INTERVAL, String(ms));
+    } catch (err) {
+      // not remembering the choice is better than breaking the click
+    }
   };
 
   const handlesort = (key) => {
@@ -127,7 +146,11 @@ const CryptoList = () => {
 
   const term = search.trim().toLowerCase();
   const visible = coins
-    .filter((coin) => coin.name.toLowerCase().includes(term) || coin.symbol.toLowerCase().includes(term))
+    .filter((coin) => {
+      const name = (coin.name || "").toLowerCase();
+      const symbol = (coin.symbol || "").toLowerCase();
+      return name.includes(term) || symbol.includes(term);
+    })
     .sort((a, b) => {
       const first = a[sort.key];
       const second = b[sort.key];
@@ -171,15 +194,19 @@ const CryptoList = () => {
         <div className="row text-center mb-4">
           <div className="col-6 col-md-3">
             <small className="text-muted d-block">total market cap</small>
-            <strong>{formatBig(global.total_market_cap[currency], currency)}</strong>
+            <strong>{formatBig(global.total_market_cap?.[currency], currency)}</strong>
           </div>
           <div className="col-6 col-md-3">
             <small className="text-muted d-block">24h volume</small>
-            <strong>{formatBig(global.total_volume[currency], currency)}</strong>
+            <strong>{formatBig(global.total_volume?.[currency], currency)}</strong>
           </div>
           <div className="col-6 col-md-3">
             <small className="text-muted d-block">btc dominance</small>
-            <strong>{global.market_cap_percentage.btc.toFixed(1)}%</strong>
+            <strong>
+              {global.market_cap_percentage?.btc === undefined
+                ? "-"
+                : `${global.market_cap_percentage.btc.toFixed(1)}%`}
+            </strong>
           </div>
           <div className="col-6 col-md-3">
             <small className="text-muted d-block">market cap 24h</small>
@@ -258,7 +285,7 @@ const CryptoList = () => {
                       <span className="me-2">
                         <CoinLogo src={coin.image} symbol={coin.symbol} name={coin.name} size={24} />
                       </span>
-                      {coin.name} <span className="text-muted">{coin.symbol.toUpperCase()}</span>
+                      {coin.name} <span className="text-muted">{(coin.symbol || "").toUpperCase()}</span>
                     </Link>
                   </td>
                   <td className="text-end">{formatPrice(coin.current_price, currency)}</td>
@@ -277,7 +304,7 @@ const CryptoList = () => {
                   <td className="text-end">{formatBig(coin.total_volume, currency)}</td>
                   <td className="text-end">{formatBig(coin.market_cap, currency)}</td>
                   <td className="text-end">
-                    {formatNumber(coin.circulating_supply)} {coin.symbol.toUpperCase()}
+                    {formatNumber(coin.circulating_supply)} {(coin.symbol || "").toUpperCase()}
                   </td>
                   <td className="text-end">
                     <Sparkline points={coin.sparkline_in_7d ? coin.sparkline_in_7d.price : []} />

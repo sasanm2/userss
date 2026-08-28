@@ -45,31 +45,44 @@ const CryptoDetail = () => {
   const [days, setDays] = useState(30);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function fetchdata() {
       setIsLoading(true);
       setError(null);
       try {
-        setCoin(await getCoin(id));
+        const data = await getCoin(id);
+        // a slower answer for the coin we just navigated away from must not
+        // land on top of this one
+        if (!cancelled) setCoin(data);
       } catch (err) {
-        setError("could not load this coin");
+        if (!cancelled) setError("could not load this coin");
       }
-      setIsLoading(false);
+      if (!cancelled) setIsLoading(false);
     }
     fetchdata();
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function fetchchart() {
       setChartLoading(true);
       try {
         const data = await getCoinChart(id, currency, days);
-        setSeries(data.prices);
+        if (!cancelled) setSeries(data.prices || []);
       } catch (err) {
-        setSeries([]);
+        if (!cancelled) setSeries([]);
       }
-      setChartLoading(false);
+      if (!cancelled) setChartLoading(false);
     }
     fetchchart();
+    return () => {
+      cancelled = true;
+    };
   }, [id, currency, days]);
 
   if (isloading) {
@@ -91,23 +104,24 @@ const CryptoDetail = () => {
     );
   }
 
-  const market = coin.market_data;
-  const price = market.current_price[currency];
-  const change24 = market.price_change_percentage_24h_in_currency[currency];
+  // a young or unusual coin can be missing whole blocks of this
+  const market = coin.market_data || {};
+  const price = market.current_price?.[currency];
+  const change24 = market.price_change_percentage_24h_in_currency?.[currency];
 
   return (
     <div className="container-fluid p-4 crypto-dark">
       <div className="row align-items-center mb-4">
         <div className="col-md-7 d-flex align-items-center">
           <span className="me-3">
-            <CoinLogo src={coin.image.large} symbol={coin.symbol} name={coin.name} size={56} />
+            <CoinLogo src={coin.image?.large} symbol={coin.symbol} name={coin.name} size={56} />
           </span>
           <div>
             <h2 className="mb-0">
-              {coin.name} <span className="text-muted">{coin.symbol.toUpperCase()}</span>
+              {coin.name} <span className="text-muted">{(coin.symbol || "").toUpperCase()}</span>
             </h2>
             <span className="badge bg-secondary me-2">rank #{coin.market_cap_rank}</span>
-            {coin.categories.slice(0, 2).map((category) => (
+            {(coin.categories || []).filter(Boolean).slice(0, 2).map((category) => (
               <span key={category} className="badge bg-light text-dark me-2">
                 {category}
               </span>
@@ -154,45 +168,45 @@ const CryptoDetail = () => {
             <tbody>
               <tr>
                 <td>market cap</td>
-                <td className="text-end">{formatBig(market.market_cap[currency], currency)}</td>
+                <td className="text-end">{formatBig(market.market_cap?.[currency], currency)}</td>
               </tr>
               <tr>
                 <td>fully diluted valuation</td>
                 <td className="text-end">
-                  {formatBig(market.fully_diluted_valuation[currency], currency)}
+                  {formatBig(market.fully_diluted_valuation?.[currency], currency)}
                 </td>
               </tr>
               <tr>
                 <td>24h volume</td>
-                <td className="text-end">{formatBig(market.total_volume[currency], currency)}</td>
+                <td className="text-end">{formatBig(market.total_volume?.[currency], currency)}</td>
               </tr>
               <tr>
                 <td>24h high / low</td>
                 <td className="text-end">
-                  {formatPrice(market.high_24h[currency], currency)} /{" "}
-                  {formatPrice(market.low_24h[currency], currency)}
+                  {formatPrice(market.high_24h?.[currency], currency)} /{" "}
+                  {formatPrice(market.low_24h?.[currency], currency)}
                 </td>
               </tr>
               <tr>
                 <td>all time high</td>
                 <td className="text-end">
-                  {formatPrice(market.ath[currency], currency)}{" "}
-                  <span className={percentClass(market.ath_change_percentage[currency])}>
-                    ({formatPercent(market.ath_change_percentage[currency])})
+                  {formatPrice(market.ath?.[currency], currency)}{" "}
+                  <span className={percentClass(market.ath_change_percentage?.[currency])}>
+                    ({formatPercent(market.ath_change_percentage?.[currency])})
                   </span>
                   <br />
-                  <small className="text-muted">{formatDate(market.ath_date[currency])}</small>
+                  <small className="text-muted">{formatDate(market.ath_date?.[currency])}</small>
                 </td>
               </tr>
               <tr>
                 <td>all time low</td>
                 <td className="text-end">
-                  {formatPrice(market.atl[currency], currency)}{" "}
-                  <span className={percentClass(market.atl_change_percentage[currency])}>
-                    ({formatPercent(market.atl_change_percentage[currency])})
+                  {formatPrice(market.atl?.[currency], currency)}{" "}
+                  <span className={percentClass(market.atl_change_percentage?.[currency])}>
+                    ({formatPercent(market.atl_change_percentage?.[currency])})
                   </span>
                   <br />
-                  <small className="text-muted">{formatDate(market.atl_date[currency])}</small>
+                  <small className="text-muted">{formatDate(market.atl_date?.[currency])}</small>
                 </td>
               </tr>
             </tbody>
@@ -204,7 +218,7 @@ const CryptoDetail = () => {
               <tr>
                 <td>circulating supply</td>
                 <td className="text-end">
-                  {formatNumber(market.circulating_supply)} {coin.symbol.toUpperCase()}
+                  {formatNumber(market.circulating_supply)} {(coin.symbol || "").toUpperCase()}
                 </td>
               </tr>
               <tr>
@@ -228,9 +242,9 @@ const CryptoDetail = () => {
               <tr>
                 <td>website</td>
                 <td className="text-end">
-                  {coin.links.homepage[0] ? (
-                    <a href={coin.links.homepage[0]} target="_blank" rel="noreferrer">
-                      {coin.links.homepage[0]}
+                  {coin.links?.homepage?.[0] ? (
+                    <a href={coin.links?.homepage?.[0]} target="_blank" rel="noreferrer">
+                      {coin.links?.homepage?.[0]}
                     </a>
                   ) : (
                     "-"
@@ -247,8 +261,8 @@ const CryptoDetail = () => {
         {CHANGES.map((change) => (
           <div key={change.key} className="col-4 col-md-2 p-2">
             <small className="text-muted d-block">{change.label}</small>
-            <strong className={percentClass(market[change.key][currency])}>
-              {formatPercent(market[change.key][currency])}
+            <strong className={percentClass(market[change.key]?.[currency])}>
+              {formatPercent(market[change.key]?.[currency])}
             </strong>
           </div>
         ))}
@@ -258,23 +272,23 @@ const CryptoDetail = () => {
       <div className="row text-center mb-4">
         <div className="col-6 col-md-3">
           <small className="text-muted d-block">twitter followers</small>
-          <strong>{formatNumber(coin.community_data.twitter_followers)}</strong>
+          <strong>{formatNumber(coin.community_data?.twitter_followers)}</strong>
         </div>
         <div className="col-6 col-md-3">
           <small className="text-muted d-block">reddit subscribers</small>
-          <strong>{formatNumber(coin.community_data.reddit_subscribers)}</strong>
+          <strong>{formatNumber(coin.community_data?.reddit_subscribers)}</strong>
         </div>
         <div className="col-6 col-md-3">
           <small className="text-muted d-block">github stars</small>
-          <strong>{formatNumber(coin.developer_data.stars)}</strong>
+          <strong>{formatNumber(coin.developer_data?.stars)}</strong>
         </div>
         <div className="col-6 col-md-3">
           <small className="text-muted d-block">github forks</small>
-          <strong>{formatNumber(coin.developer_data.forks)}</strong>
+          <strong>{formatNumber(coin.developer_data?.forks)}</strong>
         </div>
       </div>
 
-      {coin.description.en && (
+      {coin.description?.en && (
         <>
           <h4>about {coin.name}</h4>
           {/* the api ships html in the description so the tags are stripped before rendering */}

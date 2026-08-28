@@ -6,8 +6,13 @@ const HEIGHT = 320;
 const PADDING = { top: 20, right: 70, bottom: 30, left: 10 };
 
 // series is the [timestamp, price] shape coingecko returns for market_chart
-const PriceChart = ({ series = [], currency = "usd" }) => {
+const PriceChart = ({ series: given = [], currency = "usd" }) => {
   const [hover, setHover] = useState(null);
+
+  // a single null price would make every coordinate NaN, so bad points go
+  const series = given.filter(
+    (point) => Array.isArray(point) && Number.isFinite(point[0]) && Number.isFinite(point[1])
+  );
 
   if (series.length < 2) {
     return <p className="text-muted">no chart data</p>;

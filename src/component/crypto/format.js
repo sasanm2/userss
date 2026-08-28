@@ -16,9 +16,10 @@ export function formatPrice(value, currency = "usd") {
   if (value === null || value === undefined) return "-";
   const abs = Math.abs(value);
   let digits = 2;
-  if (abs < 1) digits = 4;
-  if (abs < 0.01) digits = 6;
-  if (abs < 0.0001) digits = 8;
+  // a real zero should read as 0.00, not as eight decimal places of nothing
+  if (abs > 0 && abs < 1) digits = 4;
+  if (abs > 0 && abs < 0.01) digits = 6;
+  if (abs > 0 && abs < 0.0001) digits = 8;
   return (
     currencySymbol(currency) +
     value.toLocaleString("en-US", {

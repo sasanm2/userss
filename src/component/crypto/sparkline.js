@@ -1,5 +1,8 @@
 // tiny 7 day line drawn straight into an svg, one per row of the table
-const Sparkline = ({ points = [], width = 140, height = 40 }) => {
+const Sparkline = ({ points: given = [], width = 140, height = 40 }) => {
+  // one null in the series would turn the whole path into NaN and draw nothing
+  const points = given.filter((price) => Number.isFinite(price));
+
   if (!points.length) {
     return <span className="text-muted">-</span>;
   }
