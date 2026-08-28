@@ -3,7 +3,7 @@
    here, they always come off the network */
 
 const CACHE = "coins-shell-v1";
-const SHELL = ["/", "/index.html", "/manifest.json", "/icon-192.png", "/icon-512.png"];
+const SHELL = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -42,7 +42,7 @@ self.addEventListener("fetch", (event) => {
         return response;
       })
       .catch(() =>
-        caches.match(request).then((hit) => hit || caches.match("/index.html"))
+        caches.match(request).then((hit) => hit || caches.match("./index.html"))
       )
   );
 });

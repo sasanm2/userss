@@ -25,8 +25,8 @@
       "purpose": "maskable"
     }
   ],
-  "start_url": "/crypto",
-  "scope": "/",
+  "start_url": "crypto",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
   "theme_color": "#0f1218",

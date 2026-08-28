@@ -7,7 +7,7 @@ import {BrowserRouter as Router} from 'react-router-dom';
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
-<Router>
+<Router basename={process.env.PUBLIC_URL}>
  <App />
 </Router> );
 
@@ -15,7 +15,7 @@ root.render(
 // served from a build, so the dev server is unaffected
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
+    navigator.serviceWorker.register(`${process.env.PUBLIC_URL}/service-worker.js`).catch(()=>{});
   });
 }
 
