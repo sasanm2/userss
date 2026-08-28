@@ -7,27 +7,45 @@ It installs on android as a PWA, so it can live on the home screen.
 ## The CoinGecko api key
 
 The app works with no key, on the free allowance. That allowance is only a
-handful of calls a minute, so the 1s and 5s refresh settings will be throttled
-without one.
+handful of calls a minute, so the 1s and 5s refresh settings need a key.
 
-To use a key, copy `.env.example` to `.env.local` and set:
+There are two ways to use one.
+
+### With the proxy (keeps the key secret)
+
+`server/index.js` is a small node server that holds the key and forwards the
+calls, so the key never reaches the browser. It also serves the production
+build, so the app and the api share an origin.
 
 ```
-REACT_APP_COINGECKO_KEY=your_key_here
-REACT_APP_COINGECKO_PLAN=demo
+npm run build
+COINGECKO_KEY=your_key_here npm run server
 ```
 
-A free demo key comes from https://www.coingecko.com/en/developers/dashboard.
-Set the plan to `pro` for a paid key, which switches the host and the header.
-Restart `npm start` after changing it, the value is read at build time.
+Then open http://localhost:4000. Set `COINGECKO_PLAN=pro` for a paid key, and
+`PORT` to serve somewhere other than 4000.
 
-Rate limits, at the two calls a second this page can make: the demo tier
-allows about 30 calls a minute, which comfortably covers the 10s default but
-not 1s. Sustained 1s polling needs a paid tier.
+For development, `npm run dev` starts the proxy and the react dev server
+together; the dev server forwards `/api` to the proxy. Either way the app needs
+`REACT_APP_API_BASE=/api` in `.env.local` to send its calls to the proxy rather
+than straight to coingecko.
 
-**The key is public.** Create react app inlines env values into the bundle, so
-anyone loading the site can read it out. Use a rotatable demo key, and put a
-backend in front of the api if it has to stay secret.
+The proxy only forwards the four endpoints this app uses, drops query params it
+does not recognise, and caches every answer briefly. That cache is shared by
+everyone using the server, so a hundred phones refreshing once a second still
+only cost about one upstream call a second.
+
+### Without the proxy (the key is public)
+
+Set `REACT_APP_COINGECKO_KEY` in `.env.local` and the browser calls coingecko
+directly. Simpler to deploy, but create react app inlines the value into the
+bundle, so anyone loading the site can read the key. Only use a demo key you
+are willing to rotate.
+
+Either way, a free demo key comes from
+https://www.coingecko.com/en/developers/dashboard. The demo tier allows about
+30 calls a minute, which covers the 10s default comfortably but not a sustained
+1s refresh; that needs a paid tier.
 
 ## Installing on android
 

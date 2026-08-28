@@ -1,18 +1,29 @@
 import axios from "axios";
 
-// a coingecko key lifts the rate limit enough for the fast refresh settings.
-// set REACT_APP_COINGECKO_KEY, and REACT_APP_COINGECKO_PLAN=pro if the key is
-// a pro one, since the two plans use a different host and header. with no key
-// the app still works, it is just limited to the free allowance
+// there are two ways to reach the market api.
+//
+// the safe one is the proxy in server/, which holds the key server side so it
+// never reaches the browser. set REACT_APP_API_BASE=/api to use it.
+//
+// otherwise the browser calls coingecko directly, optionally with a key in
+// REACT_APP_COINGECKO_KEY (and REACT_APP_COINGECKO_PLAN=pro for a pro key).
+// note that create react app inlines that value into the bundle, so a key used
+// this way is readable by anyone loading the site
+const PROXY_BASE = process.env.REACT_APP_API_BASE;
 const KEY = process.env.REACT_APP_COINGECKO_KEY;
 const IS_PRO = (process.env.REACT_APP_COINGECKO_PLAN || "demo").toLowerCase() === "pro";
 
-const BASE_URL = IS_PRO ? "https://pro-api.coingecko.com/api/v3" : "https://api.coingecko.com/api/v3";
+const DIRECT_URL = IS_PRO ? "https://pro-api.coingecko.com/api/v3" : "https://api.coingecko.com/api/v3";
+const BASE_URL = PROXY_BASE || DIRECT_URL;
 
-export const hasKey = Boolean(KEY);
+export const usesProxy = Boolean(PROXY_BASE);
+
+// the proxy carries its own key, so the fast refresh settings are fine there
+export const hasKey = Boolean(KEY) || Boolean(PROXY_BASE);
 
 function headers() {
-  if (!KEY) return {};
+  // through the proxy the browser never holds a key to send
+  if (PROXY_BASE || !KEY) return {};
   return IS_PRO ? { "x-cg-pro-api-key": KEY } : { "x-cg-demo-api-key": KEY };
 }
 
