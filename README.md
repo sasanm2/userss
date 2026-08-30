@@ -311,6 +311,23 @@ https://www.coingecko.com/en/developers/dashboard. The demo tier allows about
 30 calls a minute, which covers the 10s default comfortably but not a sustained
 1s refresh; that needs a paid tier.
 
+## The app on a phone
+
+The android app is this web build inside a capacitor shell, so everything in
+the interface applies there too. Two things are specific to it.
+
+The shell's own colours match the page the web app paints: the status bar, the
+navigation bar, the window background, the splash and the adaptive icon
+background are all the same plane colour, so there is no flash of another
+colour on launch or a light strip above the app.
+
+The charts change shape rather than being scaled down. An svg viewBox is fitted
+to its container, so a 900 unit wide chart in a 393px phone renders at 44%,
+which turns an 11px axis label into 5px and a 300 unit tall chart into a 130px
+sliver. On a narrow screen they switch to a viewBox around 380 units wide
+instead, so the scale lands near 1:1, the chart is a usable height and the
+labels are the size they say they are.
+
 ## Building the android apk
 
 The repo carries a capacitor android project in `android/`, so the app can be

@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { formatPrice } from "./format";
 import { COLORS } from "./theme";
+import { useCompact } from "./usecompact";
 
-const WIDTH = 900;
-const HEIGHT = 300;
-const PADDING = { top: 16, right: 88, bottom: 24, left: 8 };
+// a narrower viewBox on a phone, so the chart is not scaled down to a sliver
+// with unreadable labels
+const WIDE = { width: 900, height: 300, padding: { top: 16, right: 88, bottom: 24, left: 8 } };
+const NARROW = { width: 380, height: 260, padding: { top: 14, right: 62, bottom: 20, left: 6 } };
 
 const clean = (points) =>
   (points || []).filter(
@@ -24,6 +26,8 @@ const clean = (points) =>
  */
 const PriceChart = ({ series: given = [], currency = "usd", overlays = [], bands = [] }) => {
   const [hover, setHover] = useState(null);
+  const compact = useCompact();
+  const { width: WIDTH, height: HEIGHT, padding: PADDING } = compact ? NARROW : WIDE;
 
   const points = clean(given);
   if (points.length < 2) {
@@ -86,7 +90,7 @@ const PriceChart = ({ series: given = [], currency = "usd", overlays = [], bands
   };
 
   // the tooltip flips to the other side near the right edge so it stays on
-  const tipAnchor = hover && x(hover[0]) > WIDTH * 0.62 ? "end" : "start";
+  const tipAnchor = hover && x(hover[0]) > WIDTH * 0.6 ? "end" : "start";
   const tipOffset = tipAnchor === "end" ? -10 : 10;
 
   return (

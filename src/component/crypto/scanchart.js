@@ -1,4 +1,5 @@
 import { COLORS } from "./theme";
+import { useCompact } from "./usecompact";
 
 /* How often each indicator held its direction, against the two lines that
  * matter: the 50% a coin flip gives, and the bar the shuffled markets actually
@@ -9,13 +10,17 @@ import { COLORS } from "./theme";
  * percentages does not show at a glance which ones clear a threshold, and that
  * is the entire question the page is asking.
  */
-const ROW = 30;
-// the right gutter holds the value and its sample size, so it has to be
-// wide enough that a dot at 100% never sits under its own label
-const PADDING = { top: 40, right: 132, bottom: 8, left: 168 };
-const WIDTH = 900;
+// the right gutter holds the value and its sample size, so it has to be wide
+// enough that a dot at 100% never sits under its own label
+const WIDE = { width: 900, row: 30, padding: { top: 40, right: 132, bottom: 8, left: 168 } };
+// on a phone the labels take a smaller gutter and the sample size is dropped,
+// since the row would otherwise be mostly text
+const NARROW = { width: 380, row: 26, padding: { top: 36, right: 44, bottom: 8, left: 118 } };
 
 const ScanChart = ({ rows = [], shuffledBar = null }) => {
+  const compact = useCompact();
+  const { width: WIDTH, row: ROW, padding: PADDING } = compact ? NARROW : WIDE;
+
   if (!rows.length) return null;
 
   const height = PADDING.top + rows.length * ROW + PADDING.bottom;
@@ -46,7 +51,7 @@ const ScanChart = ({ rows = [], shuffledBar = null }) => {
               fillOpacity="0.13"
             />
             <text x={x(shuffledBar.median) + 6} y={PADDING.top - 6} fontSize="11" fill={COLORS.muted}>
-              shuffled data reaches here
+              {compact ? "shuffled" : "shuffled data reaches here"}
             </text>
           </>
         )}
@@ -62,9 +67,11 @@ const ScanChart = ({ rows = [], shuffledBar = null }) => {
               strokeWidth="1"
               strokeDasharray={tick === 50 ? "4 4" : undefined}
             />
-            <text x={x(tick)} y={PADDING.top - 26} fontSize="11" fill={COLORS.muted} textAnchor="middle">
-              {tick === 50 ? "50% chance" : `${tick}%`}
-            </text>
+            {(!compact || tick % 50 === 0) && (
+              <text x={x(tick)} y={PADDING.top - 26} fontSize="11" fill={COLORS.muted} textAnchor="middle">
+                {tick === 50 ? "50% chance" : `${tick}%`}
+              </text>
+            )}
           </g>
         ))}
 
@@ -79,7 +86,7 @@ const ScanChart = ({ rows = [], shuffledBar = null }) => {
               <text
                 x={PADDING.left - 12}
                 y={y(index) + 4}
-                fontSize="12.5"
+                fontSize={compact ? "11" : "12.5"}
                 fill={COLORS.inkSecondary}
                 textAnchor="end"
               >
@@ -99,7 +106,7 @@ const ScanChart = ({ rows = [], shuffledBar = null }) => {
               <circle cx={x(rate)} cy={y(index)} r="5.5" fill={COLORS.surface} />
               <circle cx={x(rate)} cy={y(index)} r="4" fill={tone} />
               <text
-                x={WIDTH - 72}
+                x={compact ? WIDTH - 6 : WIDTH - 72}
                 y={y(index) + 4}
                 fontSize="12"
                 fill={COLORS.inkSecondary}
@@ -108,7 +115,7 @@ const ScanChart = ({ rows = [], shuffledBar = null }) => {
               >
                 {rate.toFixed(0)}%
               </text>
-              {row.votes !== undefined && (
+              {!compact && row.votes !== undefined && (
                 <text
                   x={WIDTH - 6}
                   y={y(index) + 4}

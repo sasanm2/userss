@@ -6,12 +6,15 @@
  * 70 on an rsi.
  */
 import { COLORS } from "./theme";
+import { useCompact } from "./usecompact";
 
-const WIDTH = 900;
-const HEIGHT = 140;
-const PADDING = { top: 12, right: 70, bottom: 16, left: 10 };
+const WIDE = { width: 900, height: 140, padding: { top: 12, right: 70, bottom: 16, left: 10 } };
+const NARROW = { width: 380, height: 130, padding: { top: 12, right: 46, bottom: 14, left: 6 } };
 
 const IndicatorPanel = ({ title, lines = [], bars = null, bands = [], domain = null, format }) => {
+  const compact = useCompact();
+  const { width: WIDTH, height: HEIGHT, padding: PADDING } = compact ? NARROW : WIDE;
+
   const clean = (points) =>
     (points || []).filter(
       (point) => Array.isArray(point) && Number.isFinite(point[0]) && Number.isFinite(point[1])

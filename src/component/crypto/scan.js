@@ -244,6 +244,15 @@ const Scan = () => {
           <div className="crypto-card text-center my-3">
             <div className="h4 mb-1">{read.text}</div>
             <small className="text-muted">{read.detail}</small>
+            {/* a handful of coins can clear the coin flip test by luck, and
+                the shuffled run is the thing that settles it */}
+            {measured.length < 25 && (
+              <div className="note mt-2">
+                only {measured.length} coins here, which is few enough that this can happen by luck.
+                run more coins, or run it against shuffled history below, which is the test that
+                settles it.
+              </div>
+            )}
           </div>
 
           <div className="stat-row">
