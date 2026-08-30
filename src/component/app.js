@@ -11,6 +11,7 @@ import Notfound from './users/notfound';
 import Logout from "./users/logout";
 import CryptoList from "./crypto/cryptolist";
 import CryptoDetail from "./crypto/cryptodetail";
+import CryptoScan from "./crypto/scan";
 
 
 // inside the android shell the app always loads at "/", so the coin list is
@@ -54,6 +55,7 @@ export default function App() {
        <Route path="/not-found" element={<Notfound />}/>
        <Route path="/users/:id" element={<Dashboard />}/>
        <Route path="/crypto" element={<CryptoList />}/>
+       <Route path="/crypto/scan" element={<CryptoScan />}/>
        <Route path="/crypto/:id" element={<CryptoDetail />}/>
        <Route path="/" element={isNative ? <Navigate replace to="/crypto"/> : <Home />}/>
        <Route path="/about" element={<About />}/>

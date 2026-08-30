@@ -164,8 +164,11 @@ const CryptoList = () => {
   return (
     <div className="container-fluid p-4 crypto-dark">
       <div className="row align-items-center mb-3">
-        <div className="col-md-4">
+        <div className="col-md-4 d-flex align-items-center justify-content-between">
           <h2 className="mb-0">top 100 coins</h2>
+          <Link className="btn btn-sm btn-outline-info ms-2" to="/crypto/scan">
+            test the indicators
+          </Link>
         </div>
         <div className="col-md-5">
           <input

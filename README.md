@@ -94,6 +94,38 @@ The engine is checked against both kinds of series in
 That second case is the one worth remembering when reading any of these
 numbers on a real coin.
 
+### Testing across the whole market
+
+`/crypto/scan` runs the walk forward test over the top coins at once and pools
+the answers. One chart proves nothing: with four blocks and a dozen indicators,
+some combination always holds by luck. An indicator that is real should hold
+across a market, not only on the chart you happened to open.
+
+Three things keep the pooled number meaningful:
+
+- **One vote per coin.** The blocks inside a coin share a price history and
+  overlap through the indicator's warmup, so counting each as a separate trial
+  would inflate the confidence badly. Each coin contributes a single vote:
+  whether its blocks held more often than not.
+- **An exact binomial test** of those votes against the 50% a coin flip gives,
+  rather than an eyeballed hit rate.
+- **A correction for how many indicators were tried.** The luckiest of a dozen
+  always looks good on its own, so every p value is multiplied by the number
+  tested.
+
+Direction is reported separately from significance, because they are not the
+same thing. An indicator can be reliably unlike a coin flip by holding its
+direction far *less* than half the time. That is not an edge to trade the other
+way; it means the rule fitted noise. Those rows show red, not green.
+
+Run it against a hundred generated random walks, where by construction there is
+nothing to find, and the page says so: nothing beats chance, and several
+indicators reverse reliably enough to be worth naming. That is the result to
+expect, and the yardstick for reading any run against real coins.
+
+Each coin costs one api call for its candles, so the run is on demand, paced
+for the free allowance, and can be stopped part way.
+
 ### Checking the maths
 
 The indicators in `src/component/crypto/indicators.js` are covered two ways.
