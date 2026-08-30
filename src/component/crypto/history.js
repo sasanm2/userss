@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { backtest, readout } from "./backtest";
 import { BUY, SELL, NEUTRAL } from "./signals";
+import WalkForwardPanel from "./walkforwardpanel";
 
 /* Shows what happened after each signal, historically, on this coin and this
  * range. Deliberately blunt about sample sizes and about the base rate, since
@@ -117,6 +118,14 @@ const SignalHistory = ({ closes = [], candles = [], volumes = [], pointLabel = "
           </div>
         </>
       )}
+
+      <WalkForwardPanel
+        closes={closes}
+        candles={candles}
+        volumes={volumes}
+        horizon={horizon}
+        pointLabel={pointLabel}
+      />
 
       <p className="text-muted">
         <small>

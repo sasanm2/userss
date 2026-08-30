@@ -63,6 +63,37 @@ What it still cannot account for: the samples overlap, so they are not
 independent; it is one coin over one range, chosen after the fact; and there
 are no fees, spread or slippage in the numbers.
 
+### Walking it forward
+
+The replay above is in sample: every signal is scored on the same bars it was
+spotted on, which is the number that always looks good. Under it is a walk
+forward test, which asks whether any of that survives when the rule is only
+allowed to see the past.
+
+The history is cut into blocks. For each block the rule comes from the bars
+before it and is scored only on the block itself, so no decision is taken with
+data from its own test window. An embargo drops any training bar whose outcome
+would reach across the boundary, since otherwise part of the answer would
+already be inside the training window.
+
+What it reports: how many rules were testable forward, how often the direction
+of the edge held, the average edge in sample, and what the same rules delivered
+out of sample. A rule picked at random holds its direction about half the time,
+so 50% is the number to beat, and the gap between the two edge figures is how
+much of an apparent edge was really just the fit.
+
+The engine is checked against both kinds of series in
+`src/component/crypto/walkforward.test.js`:
+
+- a rigid repeating cycle, where the pattern genuinely does recur, holds its
+  direction 96% of the time and keeps 83% of its edge
+- a seeded random walk, where nothing is there to find, shows a +10.8 point
+  edge in sample that becomes +1.4 out of sample, with the direction holding
+  exactly 50% of the time
+
+That second case is the one worth remembering when reading any of these
+numbers on a real coin.
+
 ### Checking the maths
 
 The indicators in `src/component/crypto/indicators.js` are covered two ways.
