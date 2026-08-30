@@ -5,6 +5,8 @@
  * the macd panel needs. bands are horizontal reference levels, like the 30 and
  * 70 on an rsi.
  */
+import { COLORS } from "./theme";
+
 const WIDTH = 900;
 const HEIGHT = 140;
 const PADDING = { top: 12, right: 70, bottom: 16, left: 10 };
@@ -47,7 +49,7 @@ const IndicatorPanel = ({ title, lines = [], bars = null, bands = [], domain = n
   const zero = y(Math.max(min, Math.min(max, 0)));
 
   return (
-    <div className="mb-3">
+    <div className="chart-frame mt-3">
       <small className="text-muted d-block mb-1">
         {title}
         {drawn.map((line) => (
@@ -69,7 +71,7 @@ const IndicatorPanel = ({ title, lines = [], bars = null, bands = [], domain = n
               x2={PADDING.left + plotWidth}
               y2={y(band)}
               className="crypto-chart-grid"
-              stroke="#e9ecef"
+              stroke={COLORS.grid}
               strokeWidth="1"
               strokeDasharray="4 4"
             />
@@ -78,7 +80,7 @@ const IndicatorPanel = ({ title, lines = [], bars = null, bands = [], domain = n
               x={PADDING.left + plotWidth + 8}
               y={y(band) + 4}
               fontSize="11"
-              fill="#6c757d"
+              fill={COLORS.muted}
             >
               {band}
             </text>
@@ -92,7 +94,7 @@ const IndicatorPanel = ({ title, lines = [], bars = null, bands = [], domain = n
             y={Math.min(y(point[1]), zero)}
             width={barWidth}
             height={Math.max(1, Math.abs(y(point[1]) - zero))}
-            fill={point[1] >= 0 ? "#2ebd85" : "#f6465d"}
+            fill={point[1] >= 0 ? COLORS.good : COLORS.critical}
             opacity="0.65"
           />
         ))}

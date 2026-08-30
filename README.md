@@ -4,6 +4,32 @@ A create react app project with a crypto section at `/crypto`: the top 100
 coins with prices, changes, sparklines and charts, and a detail page per coin.
 It installs on android as a PWA, so it can live on the home screen.
 
+## The look of it
+
+The interface follows a small set of tokens in `src/component/crypto/crypto.css`
+and the matching constants in `theme.js`, which the svg charts read, so the
+colours cannot drift between the css and the charts.
+
+The palette is the validated data visualisation default, checked against this
+app's own dark surface rather than assumed:
+
+- the categorical slots the chart lines use pass the lightness band, the chroma
+  floor, the colour vision separation gates and 3:1 contrast
+- the reserved status pair for up and down measures 5.30:1 and 3.70:1 on the
+  surface, and always appears beside a signed number, so the colour never
+  carries the direction on its own
+
+Two things came out of running the validator rather than eyeballing it. The
+chart carries the price line plus two moving averages and no more: a third
+average would have put the palette's yellow beside its orange, a pair that
+measures a normal vision difference of 10.6 against a floor of 15, which is
+genuinely hard to tell apart. And the bollinger pair is drawn as one filled
+band rather than two loose dashed lines, because it is a range rather than two
+identities.
+
+On a phone the market table keeps rank, coin, price and the 24h move, and drops
+the rest rather than scrolling sideways.
+
 ## Technical analysis
 
 The coin page has a technical analysis panel behind a toggle. It computes,

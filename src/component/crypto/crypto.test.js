@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import CryptoList from "./cryptolist";
 import CryptoDetail from "./cryptodetail";
@@ -56,7 +56,10 @@ test("detail renders coin data and chart", async () => {
     <Routes><Route path="/crypto/:id" element={<CryptoDetail />} /></Routes>
   </MemoryRouter>);
   await waitFor(() => expect(screen.getAllByText(/Bitcoin/).length).toBeGreaterThan(0));
+  // the chart tab is the landing tab
+  await waitFor(() => expect(document.querySelector("svg path")).toBeTruthy());
+  // the figures live behind the market data tab
+  fireEvent.click(screen.getByRole("tab", { name: "market data" }));
   expect(screen.getByText("$73,000.00")).toBeInTheDocument();
   expect(screen.getByText(/Bitcoin is a currency/)).toBeInTheDocument();
-  await waitFor(() => expect(document.querySelector("svg path")).toBeTruthy());
 });

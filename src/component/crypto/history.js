@@ -31,12 +31,12 @@ const SignalHistory = ({ closes = [], candles = [], volumes = [], pointLabel = "
     <div className="mt-4">
       <div className="d-flex align-items-center justify-content-between flex-wrap mb-2">
         <h4 className="mb-0">what followed these signals before</h4>
-        <div className="btn-group btn-group-sm">
+        <div className="segmented">
           {HORIZONS.map((value) => (
             <button
               key={value}
               onClick={() => setHorizon(value)}
-              className={`btn btn-sm ${horizon === value ? "btn-info" : "btn-outline-info"}`}
+              aria-pressed={horizon === value}
             >
               +{value}
             </button>

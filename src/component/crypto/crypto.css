@@ -1,107 +1,340 @@
-/* dark theme, scoped to the crypto pages so the rest of the app stays light */
+/* The look of the crypto pages.
+ *
+ * Everything is written against the tokens below, so the palette lives in one
+ * place and matches theme.js, which the svg charts read. The colours are the
+ * validated data visualisation defaults, checked against this surface.
+ */
 .crypto-dark {
-  background-color: #0f1218;
-  color: #e6e8eb;
+  /* surfaces, from the page plane up */
+  --plane: #0b0e13;
+  --surface: #131822;
+  --raised: #1a2130;
+  --hover: #1e2636;
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  /* ink */
+  --ink: #ffffff;
+  --ink-2: #c3c2b7;
+  --ink-3: #898781;
+
+  /* status, reserved */
+  --good: #0ca30c;
+  --bad: #d03b3b;
+
+  /* categorical slots, fixed order */
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+
+  /* spacing and shape */
+  --gap: 16px;
+  --radius: 12px;
+  --radius-sm: 8px;
+
+  background-color: var(--plane);
+  color: var(--ink-2);
   min-height: 100vh;
+  padding: 20px 24px 48px;
 }
 
+@media (max-width: 720px) {
+  .crypto-dark {
+    padding: 12px 12px 40px;
+  }
+}
+
+/* ---------- type ---------- */
+
+.crypto-dark h1,
 .crypto-dark h2,
 .crypto-dark h3,
+.crypto-dark h4,
+.crypto-dark h5 {
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  font-weight: 650;
+}
+
+.crypto-dark h2 {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
 .crypto-dark h4 {
-  color: #f8f9fa;
+  font-size: 1.05rem;
 }
 
 .crypto-dark .text-muted {
-  color: #8b93a1 !important;
+  color: var(--ink-3) !important;
 }
 
 .crypto-dark .text-success {
-  color: #2ebd85 !important;
+  color: var(--good) !important;
 }
 
 .crypto-dark .text-danger {
-  color: #f6465d !important;
+  color: var(--bad) !important;
 }
 
 .crypto-dark a {
-  color: #58a6ff;
+  color: var(--series-1);
+  text-decoration: none;
 }
 
-.crypto-dark .table {
-  --bs-table-bg: transparent;
-  --bs-table-color: #e6e8eb;
-  --bs-table-border-color: #232935;
-  --bs-table-hover-bg: #1a1f29;
-  --bs-table-hover-color: #ffffff;
-  color: #e6e8eb;
+/* every column of figures lines up */
+.crypto-dark .num,
+.crypto-dark td.text-end,
+.crypto-dark th.text-end {
+  font-variant-numeric: tabular-nums;
 }
 
-.crypto-dark .table thead th {
-  background-color: #151a22;
-  color: #8b93a1;
-  border-bottom: 1px solid #232935;
-  font-weight: 600;
-  white-space: nowrap;
-  position: sticky;
-  top: 0;
-  z-index: 1;
+/* ---------- surfaces ---------- */
+
+.crypto-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
 }
 
-.crypto-dark .table thead th:hover {
-  color: #e6e8eb;
+.crypto-card + .crypto-card {
+  margin-top: var(--gap);
 }
 
-.crypto-dark .table tbody td {
-  border-color: #232935;
+/* ---------- stat tiles ---------- */
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--gap);
+  margin-bottom: var(--gap);
 }
 
-/* the coin name link inherits the row colour instead of the light theme dark text */
-.crypto-dark .table a {
-  color: #e6e8eb !important;
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
 }
 
-.crypto-dark .table a:hover {
-  color: #58a6ff !important;
+.stat-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--ink-3);
+  text-transform: lowercase;
+  letter-spacing: 0.01em;
+  margin-bottom: 4px;
 }
+
+.stat-value {
+  font-size: 1.35rem;
+  font-weight: 650;
+  color: var(--ink);
+  line-height: 1.15;
+}
+
+.stat-sub {
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+
+/* ---------- controls ---------- */
 
 .crypto-dark .form-control,
 .crypto-dark .form-select {
-  background-color: #151a22;
-  border-color: #232935;
-  color: #e6e8eb;
+  background-color: var(--raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  padding: 9px 12px;
 }
 
 .crypto-dark .form-control::placeholder {
-  color: #6b7280;
+  color: var(--ink-3);
 }
 
 .crypto-dark .form-control:focus,
 .crypto-dark .form-select:focus {
-  background-color: #151a22;
-  border-color: #3b82f6;
-  color: #e6e8eb;
-  box-shadow: none;
+  background-color: var(--raised);
+  border-color: var(--series-1);
+  color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(57, 135, 229, 0.22);
 }
 
-.crypto-dark .badge.bg-light {
-  background-color: #232935 !important;
-  color: #c9d1d9 !important;
+/* a segmented control, which is what all those button rows want to be */
+.segmented {
+  display: inline-flex;
+  background: var(--raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 2px;
 }
 
-.crypto-dark .btn-outline-info {
-  color: #58a6ff;
-  border-color: #2c3442;
+.segmented button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 0.82rem;
+  font-weight: 550;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  /* a comfortable target on a phone */
+  min-height: 32px;
+  transition: background-color 0.12s ease, color 0.12s ease;
 }
 
-.crypto-dark .btn-outline-info:hover {
-  background-color: #1a1f29;
-  border-color: #58a6ff;
+.segmented button:hover:not(:disabled) {
+  color: var(--ink);
+  background: var(--hover);
+}
+
+.segmented button[aria-pressed="true"] {
+  background: var(--series-1);
   color: #ffffff;
 }
+
+.segmented button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--ink-3);
+  margin-bottom: 5px;
+}
+
+.crypto-dark .btn-primary-soft {
+  background: var(--series-1);
+  border: 0;
+  color: #fff;
+  font-weight: 550;
+  border-radius: var(--radius-sm);
+  padding: 9px 16px;
+  min-height: 38px;
+}
+
+.crypto-dark .btn-quiet {
+  background: var(--raised);
+  border: 1px solid var(--border);
+  color: var(--ink-2);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  min-height: 36px;
+}
+
+.crypto-dark .btn-quiet:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+/* ---------- tabs ---------- */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--gap);
+  overflow-x: auto;
+}
+
+.tabs button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--ink-3);
+  font-size: 0.95rem;
+  font-weight: 550;
+  padding: 10px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: 44px;
+}
+
+.tabs button:hover {
+  color: var(--ink);
+}
+
+.tabs button[aria-selected="true"] {
+  color: var(--ink);
+  border-bottom-color: var(--series-1);
+}
+
+/* ---------- tables ---------- */
+
+.crypto-dark .table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--ink-2);
+  --bs-table-border-color: var(--border);
+  --bs-table-hover-bg: var(--hover);
+  --bs-table-hover-color: var(--ink);
+  color: var(--ink-2);
+  margin-bottom: 0;
+}
+
+.crypto-dark .table thead th {
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid var(--border);
+  padding: 10px 12px;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--plane);
+}
+
+.crypto-dark .table tbody td {
+  border-color: var(--border);
+  padding: 12px;
+  vertical-align: middle;
+}
+
+.crypto-dark .table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.crypto-dark .table a {
+  color: var(--ink) !important;
+  font-weight: 550;
+}
+
+.crypto-dark .table a:hover {
+  color: var(--series-1) !important;
+}
+
+/* sortable headers say so */
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable:hover {
+  color: var(--ink) !important;
+}
+
+.sort-caret {
+  color: var(--series-1);
+  margin-left: 3px;
+}
+
+/* ---------- coin identity ---------- */
 
 .coin-logo {
   border-radius: 50%;
   object-fit: contain;
+  background: var(--raised);
 }
 
 .coin-logo-fallback {
@@ -109,51 +342,197 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background-color: #2c3442;
-  color: #c9d1d9;
-  font-weight: 600;
+  background: var(--raised);
+  border: 1px solid var(--border);
+  color: var(--ink-2);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+
+.coin-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.coin-symbol {
+  color: var(--ink-3);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.rank-pill {
+  display: inline-block;
+  min-width: 26px;
+  font-size: 0.75rem;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- the price hero ---------- */
+
+.price-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.price-figure {
+  font-size: 2.1rem;
+  font-weight: 650;
+  color: var(--ink);
+  line-height: 1.1;
   letter-spacing: -0.02em;
 }
 
-/* the svg chart keeps its light presentation attributes until it sits inside a
-   dark page, where these override them */
-.crypto-dark .crypto-chart-grid {
-  stroke: #232935;
+.delta {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
-.crypto-dark .crypto-chart-label {
-  fill: #8b93a1;
+.badge-soft {
+  display: inline-block;
+  background: var(--raised);
+  border: 1px solid var(--border);
+  color: var(--ink-2);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  margin-right: 6px;
 }
 
-.crypto-dark .crypto-chart-cursor {
-  stroke: #6b7280;
+/* ---------- charts ---------- */
+
+.chart-frame {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 12px 6px;
 }
 
-/* on a phone the eleven column table does not fit, so everything but rank,
-   coin, price and the 24h move is dropped rather than left to scroll sideways */
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 8px 4px 2px;
+  font-size: 0.78rem;
+  color: var(--ink-2);
+}
+
+.legend-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-swatch {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* the readout under a chart never collapses, so nothing jumps on hover */
+.chart-readout {
+  min-height: 22px;
+  font-size: 0.8rem;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  padding: 6px 0 2px;
+}
+
+.crypto-chart-grid {
+  stroke: var(--grid, #242b38);
+}
+
+.crypto-chart-label {
+  fill: #898781;
+  font-size: 11px;
+}
+
+.crypto-chart-cursor {
+  stroke: #5b6577;
+}
+
+/* ---------- notices ---------- */
+
+.crypto-dark .alert {
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  font-size: 0.88rem;
+}
+
+.crypto-dark .alert-secondary {
+  background: var(--surface);
+  color: var(--ink-2);
+}
+
+.crypto-dark .alert-warning {
+  background: rgba(250, 178, 25, 0.1);
+  border-color: rgba(250, 178, 25, 0.35);
+  color: #f4c667;
+}
+
+.crypto-dark .alert-danger {
+  background: rgba(208, 59, 59, 0.12);
+  border-color: rgba(208, 59, 59, 0.4);
+  color: #f0908f;
+}
+
+.note {
+  font-size: 0.78rem;
+  color: var(--ink-3);
+  line-height: 1.55;
+}
+
+/* ---------- progress ---------- */
+
+.crypto-dark .progress {
+  background: var(--raised);
+  border-radius: 999px;
+  height: 6px;
+}
+
+.crypto-dark .progress-bar {
+  background: var(--series-1);
+}
+
+/* ---------- the phone ---------- */
+
 @media (max-width: 720px) {
-  .crypto-dark .table th:nth-child(4),
-  .crypto-dark .table td:nth-child(4),
-  .crypto-dark .table th:nth-child(6),
-  .crypto-dark .table td:nth-child(6),
-  .crypto-dark .table th:nth-child(7),
-  .crypto-dark .table td:nth-child(7),
-  .crypto-dark .table th:nth-child(8),
-  .crypto-dark .table td:nth-child(8),
-  .crypto-dark .table th:nth-child(9),
-  .crypto-dark .table td:nth-child(9),
-  .crypto-dark .table th:nth-child(10),
-  .crypto-dark .table td:nth-child(10),
-  .crypto-dark .table th:nth-child(11),
-  .crypto-dark .table td:nth-child(11) {
+  /* The eleven column table does not fit a phone, so it keeps rank, coin,
+     price and the 24h move, and drops the rest rather than scrolling sideways.
+     The 24h column stays because it is the number people actually read. The
+     sparkline goes: at 140px it pushes the row past the screen, and the four
+     columns that remain fit without any sideways scrolling. */
+  .crypto-dark .market-table th:nth-child(4),
+  .crypto-dark .market-table td:nth-child(4),
+  .crypto-dark .market-table th:nth-child(n + 6),
+  .crypto-dark .market-table td:nth-child(n + 6) {
     display: none;
   }
 
-  .crypto-dark {
-    padding: 0.75rem !important;
+  .crypto-dark .table thead th,
+  .crypto-dark .table tbody td {
+    padding: 10px 8px;
   }
 
   .crypto-dark h2 {
-    font-size: 1.4rem;
+    font-size: 1.25rem;
+  }
+
+  .price-figure {
+    font-size: 1.7rem;
+  }
+
+  .stat-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .stat-value {
+    font-size: 1.1rem;
   }
 }

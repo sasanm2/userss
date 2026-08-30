@@ -41,7 +41,10 @@ const CryptoDetail = () => {
   const [series, setSeries] = useState([]);
   const [volumes, setVolumes] = useState([]);
   const [candles, setCandles] = useState([]);
-  const [showAnalysis, setShowAnalysis] = useState(false);
+  // the page used to be one long scroll with the analysis hidden behind a
+  // toggle at the bottom. tabs put the three things it does side by side
+  const [tab, setTab] = useState("chart");
+  const showAnalysis = tab === "analysis";
   const [isloading, setIsLoading] = useState(true);
   const [chartloading, setChartLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -96,8 +99,8 @@ const CryptoDetail = () => {
   }, [id, currency, days]);
 
   // the high and low the stochastic, williams %r, cci and atr need. only the
-  // analysis panel uses these, so this is fetched separately and its failure
-  // leaves the rest of the page alone
+  // analysis tab uses these, so this is fetched separately, only when that tab
+  // is open, and its failure leaves the rest of the page alone
   useEffect(() => {
     let cancelled = false;
 
@@ -122,7 +125,7 @@ const CryptoDetail = () => {
 
   if (isloading) {
     return (
-      <div className="container-fluid p-4 crypto-dark">
+      <div className="crypto-dark">
         <LoadingCrypto rows={8} />
       </div>
     );
@@ -130,9 +133,9 @@ const CryptoDetail = () => {
 
   if (error || !coin) {
     return (
-      <div className="container-fluid p-4 crypto-dark">
+      <div className="crypto-dark">
         <div className="alert alert-danger">{error || "coin not found"}</div>
-        <button onClick={() => navigate("/crypto")} className="btn btn-info btn-sm">
+        <button onClick={() => navigate("/crypto")} className="btn-primary-soft">
           back to the list
         </button>
       </div>
@@ -145,71 +148,98 @@ const CryptoDetail = () => {
   const change24 = market.price_change_percentage_24h_in_currency?.[currency];
 
   return (
-    <div className="container-fluid p-4 crypto-dark">
-      <div className="row align-items-center mb-4">
-        <div className="col-md-7 d-flex align-items-center">
-          <span className="me-3">
-            <CoinLogo src={coin.image?.large} symbol={coin.symbol} name={coin.name} size={56} />
-          </span>
+    <div className="crypto-dark">
+      <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+        <button onClick={() => navigate("/crypto")} className="btn btn-quiet">
+          ← all coins
+        </button>
+        <select
+          className="form-select"
+          style={{ width: "auto" }}
+          value={currency}
+          onChange={(event) => setCurrency(event.target.value)}
+          aria-label="currency"
+        >
+          {CURRENCIES.map((item) => (
+            <option key={item.value} value={item.value}>
+              {item.value.toUpperCase()}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="price-hero mb-3">
+        <CoinLogo src={coin.image?.large} symbol={coin.symbol} name={coin.name} size={52} />
+        <div>
+          <h2 className="mb-1">
+            {coin.name} <span className="coin-symbol">{(coin.symbol || "").toUpperCase()}</span>
+          </h2>
           <div>
-            <h2 className="mb-0">
-              {coin.name} <span className="text-muted">{(coin.symbol || "").toUpperCase()}</span>
-            </h2>
-            <span className="badge bg-secondary me-2">rank #{coin.market_cap_rank}</span>
+            <span className="badge-soft">rank #{coin.market_cap_rank}</span>
             {(coin.categories || []).filter(Boolean).slice(0, 2).map((category) => (
-              <span key={category} className="badge bg-light text-dark me-2">
+              <span key={category} className="badge-soft">
                 {category}
               </span>
             ))}
           </div>
         </div>
-        <div className="col-md-3 text-md-end">
-          <h3 className="mb-0">{formatPrice(price, currency)}</h3>
-          <span className={percentClass(change24)}>{formatPercent(change24)} (24h)</span>
-        </div>
-        <div className="col-md-2">
-          <select
-            className="form-select"
-            value={currency}
-            onChange={(event) => setCurrency(event.target.value)}
-          >
-            {CURRENCIES.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.value.toUpperCase()}
-              </option>
-            ))}
-          </select>
+        <div className="ms-auto text-end">
+          <div className="price-figure">{formatPrice(price, currency)}</div>
+          {/* the sign carries the direction as well as the colour */}
+          <span className={`delta ${percentClass(change24)}`}>
+            {formatPercent(change24)} <span className="text-muted">24h</span>
+          </span>
         </div>
       </div>
 
-      <div className="btn-group mb-3">
-        {RANGES.map((range) => (
+      <div className="tabs" role="tablist">
+        {[
+          { key: "chart", label: "chart" },
+          { key: "analysis", label: "analysis" },
+          { key: "about", label: "market data" },
+        ].map((item) => (
           <button
-            key={range.label}
-            onClick={() => setDays(range.days)}
-            className={`btn btn-sm ${days === range.days ? "btn-info" : "btn-outline-info"}`}
+            key={item.key}
+            role="tab"
+            aria-selected={tab === item.key}
+            onClick={() => setTab(item.key)}
           >
-            {range.label}
+            {item.label}
           </button>
         ))}
       </div>
 
-      {chartloading ? (
-        <LoadingCrypto rows={4} />
-      ) : showAnalysis ? (
-        <Analysis series={series} candles={candles} volumes={volumes} currency={currency} />
-      ) : (
-        <PriceChart series={series} currency={currency} />
+      {tab !== "about" && (
+        <div className="segmented mb-3" role="group" aria-label="date range">
+          {RANGES.map((range) => (
+            <button
+              key={range.label}
+              aria-pressed={days === range.days}
+              onClick={() => setDays(range.days)}
+            >
+              {range.label}
+            </button>
+          ))}
+        </div>
       )}
 
-      <button
-        onClick={() => setShowAnalysis(!showAnalysis)}
-        className={`btn btn-sm mt-2 ${showAnalysis ? "btn-info" : "btn-outline-info"}`}
-      >
-        {showAnalysis ? "hide technical analysis" : "show technical analysis"}
-      </button>
+      {tab === "chart" &&
+        (chartloading ? (
+          <LoadingCrypto rows={4} />
+        ) : (
+          <PriceChart series={series} currency={currency} />
+        ))}
 
-      <h4 className="mt-4">market data</h4>
+      {tab === "analysis" &&
+        (chartloading ? (
+          <LoadingCrypto rows={6} />
+        ) : (
+          <Analysis series={series} candles={candles} volumes={volumes} currency={currency} />
+        ))}
+
+      {tab === "about" && (
+      <>
+      <h4 className="mt-2">market data</h4>
       <div className="row">
         <div className="col-md-6">
           <table className="table table-sm">
@@ -305,35 +335,30 @@ const CryptoDetail = () => {
       </div>
 
       <h4>price change</h4>
-      <div className="row text-center mb-4">
+      <div className="stat-row">
         {CHANGES.map((change) => (
-          <div key={change.key} className="col-4 col-md-2 p-2">
-            <small className="text-muted d-block">{change.label}</small>
-            <strong className={percentClass(market[change.key]?.[currency])}>
+          <div className="stat" key={change.key}>
+            <span className="stat-label">{change.label}</span>
+            <div className={`stat-value ${percentClass(market[change.key]?.[currency])}`}>
               {formatPercent(market[change.key]?.[currency])}
-            </strong>
+            </div>
           </div>
         ))}
       </div>
 
       <h4>community and development</h4>
-      <div className="row text-center mb-4">
-        <div className="col-6 col-md-3">
-          <small className="text-muted d-block">twitter followers</small>
-          <strong>{formatNumber(coin.community_data?.twitter_followers)}</strong>
-        </div>
-        <div className="col-6 col-md-3">
-          <small className="text-muted d-block">reddit subscribers</small>
-          <strong>{formatNumber(coin.community_data?.reddit_subscribers)}</strong>
-        </div>
-        <div className="col-6 col-md-3">
-          <small className="text-muted d-block">github stars</small>
-          <strong>{formatNumber(coin.developer_data?.stars)}</strong>
-        </div>
-        <div className="col-6 col-md-3">
-          <small className="text-muted d-block">github forks</small>
-          <strong>{formatNumber(coin.developer_data?.forks)}</strong>
-        </div>
+      <div className="stat-row">
+        {[
+          ["twitter followers", coin.community_data?.twitter_followers],
+          ["reddit subscribers", coin.community_data?.reddit_subscribers],
+          ["github stars", coin.developer_data?.stars],
+          ["github forks", coin.developer_data?.forks],
+        ].map(([label, value]) => (
+          <div className="stat" key={label}>
+            <span className="stat-label">{label}</span>
+            <div className="stat-value">{formatNumber(value)}</div>
+          </div>
+        ))}
       </div>
 
       {coin.description?.en && (
@@ -344,9 +369,8 @@ const CryptoDetail = () => {
         </>
       )}
 
-      <button onClick={() => navigate("/crypto")} className="btn btn-info btn-sm">
-        back to the list
-      </button>
+      </>
+      )}
     </div>
   );
 };

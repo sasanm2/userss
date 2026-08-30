@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import CryptoDetail from "./cryptodetail";
 
@@ -47,6 +47,8 @@ test("a coin with null fields still renders", async () => {
     </MemoryRouter>
   );
   await waitFor(() => expect(screen.getAllByText(/Sparse Coin/).length).toBeGreaterThan(0));
+  // the null fields are in the market data tab, which is where they would throw
+  fireEvent.click(screen.getByRole("tab", { name: "market data" }));
   expect(screen.getByText("$41.00M")).toBeInTheDocument();
   expect(screen.getByText("unlimited")).toBeInTheDocument();
 });

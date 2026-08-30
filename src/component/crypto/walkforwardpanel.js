@@ -78,7 +78,7 @@ const WalkForwardPanel = ({ closes = [], candles = [], volumes = [], horizon = 7
 
           <button
             onClick={() => setShowRules(!showRules)}
-            className="btn btn-sm btn-outline-info mb-2"
+            className="btn-quiet mb-2"
           >
             {showRules ? "hide the individual tests" : `show all ${result.rows.length} tests`}
           </button>

@@ -125,10 +125,10 @@ const Scan = () => {
   const measured = results.filter((r) => r.walk && r.walk.rows.length);
 
   return (
-    <div className="container-fluid p-4 crypto-dark">
+    <div className="crypto-dark">
       <div className="d-flex align-items-center justify-content-between flex-wrap mb-2">
         <h2 className="mb-0">does anything work across the market</h2>
-        <Link className="btn btn-sm btn-outline-info" to="/crypto">
+        <Link className="btn-quiet" to="/crypto">
           back to the list
         </Link>
       </div>
@@ -146,13 +146,13 @@ const Scan = () => {
       <div className="row align-items-end mb-3">
         <div className="col-auto">
           <small className="text-muted d-block">coins</small>
-          <div className="btn-group btn-group-sm">
+          <div className="segmented">
             {SIZES.map((value) => (
               <button
                 key={value}
                 disabled={running}
                 onClick={() => setSize(value)}
-                className={`btn btn-sm ${size === value ? "btn-info" : "btn-outline-info"}`}
+                aria-pressed={size === value}
               >
                 {value}
               </button>
@@ -161,13 +161,13 @@ const Scan = () => {
         </div>
         <div className="col-auto">
           <small className="text-muted d-block">horizon</small>
-          <div className="btn-group btn-group-sm">
+          <div className="segmented">
             {HORIZONS.map((value) => (
               <button
                 key={value}
                 disabled={running}
                 onClick={() => setHorizon(value)}
-                className={`btn btn-sm ${horizon === value ? "btn-info" : "btn-outline-info"}`}
+                aria-pressed={horizon === value}
               >
                 +{value}
               </button>
@@ -176,13 +176,13 @@ const Scan = () => {
         </div>
         <div className="col-auto">
           <small className="text-muted d-block">history</small>
-          <div className="btn-group btn-group-sm">
+          <div className="segmented">
             {[90, 180, 365].map((value) => (
               <button
                 key={value}
                 disabled={running}
                 onClick={() => setDays(value)}
-                className={`btn btn-sm ${days === value ? "btn-info" : "btn-outline-info"}`}
+                aria-pressed={days === value}
               >
                 {value}d
               </button>
@@ -191,11 +191,11 @@ const Scan = () => {
         </div>
         <div className="col-auto">
           {running ? (
-            <button onClick={() => (stop.current = true)} className="btn btn-sm btn-danger">
+            <button onClick={() => (stop.current = true)} className="btn-quiet">
               stop
             </button>
           ) : (
-            <button onClick={run} className="btn btn-sm btn-info">
+            <button onClick={run} className="btn-primary-soft">
               run the test
             </button>
           )}
@@ -312,13 +312,13 @@ const Scan = () => {
             <div className="row align-items-end mb-3">
               <div className="col-auto">
                 <small className="text-muted d-block">shuffled runs</small>
-                <div className="btn-group btn-group-sm">
+                <div className="segmented">
                   {REPLICATES.map((value) => (
                     <button
                       key={value}
                       disabled={shuffling}
                       onClick={() => setReplicates(value)}
-                      className={`btn btn-sm ${replicates === value ? "btn-info" : "btn-outline-info"}`}
+                      aria-pressed={replicates === value}
                     >
                       {value}
                     </button>
@@ -327,11 +327,11 @@ const Scan = () => {
               </div>
               <div className="col-auto">
                 {shuffling ? (
-                  <button onClick={() => (stopShuffle.current = true)} className="btn btn-sm btn-danger">
+                  <button onClick={() => (stopShuffle.current = true)} className="btn-quiet">
                     stop
                   </button>
                 ) : (
-                  <button onClick={runShuffled} disabled={running} className="btn btn-sm btn-info">
+                  <button onClick={runShuffled} disabled={running} className="btn-primary-soft">
                     run against shuffled history
                   </button>
                 )}
@@ -406,7 +406,7 @@ const Scan = () => {
             )}
           </div>
 
-          <p className="text-muted">
+          <p className="note">
             <small>
               {measured.length} of {results.length} coins had enough history to test. The blocks
               inside one coin share a price history, so they are not four independent trials: each

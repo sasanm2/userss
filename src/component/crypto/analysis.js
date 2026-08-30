@@ -2,9 +2,10 @@ import { useState } from "react";
 import PriceChart from "./pricechart";
 import IndicatorPanel from "./indicatorpanel";
 import SignalHistory from "./history";
-import { sma, ema, rsi, macd, bollinger } from "./indicators";
+import { sma, rsi, macd, bollinger } from "./indicators";
 import { movingAverageRows, oscillatorRows, summarise, BUY, SELL } from "./signals";
 import { formatPrice, formatNumber } from "./format";
+import { COLORS } from "./theme";
 
 /* Pairs an indicator series with the timestamps of the prices it came from, so
  * the charts can line the two up by time rather than by index. */
@@ -48,18 +49,30 @@ const Analysis = ({ series = [], candles = [], volumes = [], currency = "usd" })
   const bands = bollinger(closes, 20, 2);
   const macdValue = macd(closes);
 
+  /* The price line is categorical slot 1, so the averages take slots 2 and 3.
+   *
+   * Only two of them. A fourth line here would put slot 4 yellow beside slot 2
+   * orange, and that pair measures a normal vision difference of 10.6, under
+   * the floor of 15: they are genuinely hard to tell apart, colour blind or
+   * not. The palette rule is to cut a series rather than invent a new hue, so
+   * the third average is dropped and the two that carry the most meaning stay.
+   */
   const overlays = [
-    { label: "SMA 20", color: "#f0b90b", points: withTimes(times, sma(closes, 20)) },
-    { label: "SMA 50", color: "#58a6ff", points: withTimes(times, sma(closes, 50)) },
-    { label: "EMA 12", color: "#c586ff", points: withTimes(times, ema(closes, 12)) },
+    { label: "SMA 20", color: COLORS.series[1], points: withTimes(times, sma(closes, 20)) },
+    { label: "SMA 50", color: COLORS.series[2], points: withTimes(times, sma(closes, 50)) },
   ].filter((overlay) => overlay.points.length > 1);
 
-  if (showBands) {
-    overlays.push(
-      { label: "Bollinger upper", color: "#8b93a1", dashed: true, points: withTimes(times, bands.upper) },
-      { label: "Bollinger lower", color: "#8b93a1", dashed: true, points: withTimes(times, bands.lower) }
-    );
-  }
+  // a range, not an identity, so it is drawn as one neutral band
+  const drawnBands = showBands
+    ? [
+        {
+          label: "Bollinger (20, 2)",
+          color: COLORS.muted,
+          upper: withTimes(times, bands.upper),
+          lower: withTimes(times, bands.lower),
+        },
+      ]
+    : [];
 
   const table = (title, rows) => (
     <div className="col-md-6">
@@ -98,24 +111,26 @@ const Analysis = ({ series = [], candles = [], volumes = [], currency = "usd" })
 
   return (
     <div>
-      <div className="d-flex align-items-center justify-content-between flex-wrap mb-2">
+      <div className="d-flex align-items-center justify-content-between flex-wrap mb-2 gap-2">
         <h4 className="mb-0">technical analysis</h4>
-        <button
-          onClick={() => setShowBands(!showBands)}
-          className={`btn btn-sm ${showBands ? "btn-info" : "btn-outline-info"}`}
-        >
-          bollinger bands
-        </button>
+        <div className="segmented">
+          <button aria-pressed={showBands} onClick={() => setShowBands(true)}>
+            with bands
+          </button>
+          <button aria-pressed={!showBands} onClick={() => setShowBands(false)}>
+            price only
+          </button>
+        </div>
       </div>
 
-      <PriceChart series={points} currency={currency} overlays={overlays} />
+      <PriceChart series={points} currency={currency} overlays={overlays} bands={drawnBands} />
 
       <IndicatorPanel
         title="RSI (14)"
         domain={[0, 100]}
         bands={[30, 70]}
         format={(value) => value.toFixed(1)}
-        lines={[{ label: "rsi", color: "#f0b90b", points: withTimes(times, rsi(closes, 14)) }]}
+        lines={[{ label: "rsi", color: COLORS.series[0], points: withTimes(times, rsi(closes, 14)) }]}
       />
 
       <IndicatorPanel
@@ -123,8 +138,8 @@ const Analysis = ({ series = [], candles = [], volumes = [], currency = "usd" })
         format={(value) => value.toFixed(4)}
         bars={{ points: withTimes(times, macdValue.histogram) }}
         lines={[
-          { label: "macd", color: "#58a6ff", points: withTimes(times, macdValue.line) },
-          { label: "signal", color: "#f6465d", points: withTimes(times, macdValue.signal) },
+          { label: "macd", color: COLORS.series[0], points: withTimes(times, macdValue.line) },
+          { label: "signal", color: COLORS.series[1], points: withTimes(times, macdValue.signal) },
         ]}
       />
 

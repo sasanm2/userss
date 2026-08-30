@@ -162,84 +162,85 @@ const CryptoList = () => {
     });
 
   return (
-    <div className="container-fluid p-4 crypto-dark">
-      <div className="row align-items-center mb-3">
-        <div className="col-md-4 d-flex align-items-center justify-content-between">
-          <h2 className="mb-0">top 100 coins</h2>
-          <Link className="btn btn-sm btn-outline-info ms-2" to="/crypto/scan">
-            test the indicators
-          </Link>
-        </div>
-        <div className="col-md-5">
-          <input
-            className="form-control"
-            placeholder="search a coin by name or symbol"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-          />
-        </div>
-        <div className="col-md-3">
-          <select
-            className="form-select"
-            value={currency}
-            onChange={(event) => setCurrency(event.target.value)}
-          >
-            {CURRENCIES.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.value.toUpperCase()}
-              </option>
-            ))}
-          </select>
-        </div>
+    <div className="crypto-dark">
+      <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <h2>top 100 coins</h2>
+        <Link className="btn btn-quiet" to="/crypto/scan">
+          test the indicators
+        </Link>
+      </div>
+
+      <div className="d-flex flex-wrap gap-2 mb-3">
+        <input
+          className="form-control"
+          style={{ flex: "1 1 260px", minWidth: 0 }}
+          placeholder="search a coin by name or symbol"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          aria-label="search coins"
+        />
+        <select
+          className="form-select"
+          style={{ width: "auto" }}
+          value={currency}
+          onChange={(event) => setCurrency(event.target.value)}
+          aria-label="currency"
+        >
+          {CURRENCIES.map((item) => (
+            <option key={item.value} value={item.value}>
+              {item.value.toUpperCase()}
+            </option>
+          ))}
+        </select>
       </div>
 
       {global && (
-        <div className="row text-center mb-4">
-          <div className="col-6 col-md-3">
-            <small className="text-muted d-block">total market cap</small>
-            <strong>{formatBig(global.total_market_cap?.[currency], currency)}</strong>
+        <div className="stat-row">
+          <div className="stat">
+            <span className="stat-label">total market cap</span>
+            <div className="stat-value">{formatBig(global.total_market_cap?.[currency], currency)}</div>
           </div>
-          <div className="col-6 col-md-3">
-            <small className="text-muted d-block">24h volume</small>
-            <strong>{formatBig(global.total_volume?.[currency], currency)}</strong>
+          <div className="stat">
+            <span className="stat-label">24h volume</span>
+            <div className="stat-value">{formatBig(global.total_volume?.[currency], currency)}</div>
           </div>
-          <div className="col-6 col-md-3">
-            <small className="text-muted d-block">btc dominance</small>
-            <strong>
+          <div className="stat">
+            <span className="stat-label">btc dominance</span>
+            <div className="stat-value">
               {global.market_cap_percentage?.btc === undefined
                 ? "-"
                 : `${global.market_cap_percentage.btc.toFixed(1)}%`}
-            </strong>
+            </div>
           </div>
-          <div className="col-6 col-md-3">
-            <small className="text-muted d-block">market cap 24h</small>
-            <strong className={percentClass(global.market_cap_change_percentage_24h_usd)}>
+          <div className="stat">
+            <span className="stat-label">market cap 24h</span>
+            <div className={`stat-value ${percentClass(global.market_cap_change_percentage_24h_usd)}`}>
               {formatPercent(global.market_cap_change_percentage_24h_usd)}
-            </strong>
+            </div>
           </div>
         </div>
       )}
 
-      <div className="row align-items-center mb-3">
-        <div className="col-auto d-flex align-items-center">
-          <small className="text-muted me-2">refresh</small>
-          <div className="btn-group btn-group-sm">
+      <div className="d-flex align-items-center flex-wrap gap-3 mb-3">
+        <div className="d-flex align-items-center gap-2">
+          <span className="text-muted" style={{ fontSize: "0.78rem" }}>
+            refresh
+          </span>
+          <div className="segmented" role="group" aria-label="refresh rate">
             {INTERVALS.map((item) => (
               <button
                 key={item.ms}
+                aria-pressed={interval === item.ms}
                 onClick={() => handlerefresh(item.ms)}
-                className={`btn btn-sm ${interval === item.ms ? "btn-info" : "btn-outline-info"}`}
               >
                 {item.label}
               </button>
             ))}
           </div>
         </div>
-        <div className="col">
-          <small className="text-muted">
-            {updated ? `updated ${updated.toLocaleTimeString()}` : "waiting for the first prices"}
-          </small>
-        </div>
+        <span className="text-muted" style={{ fontSize: "0.78rem" }}>
+          {updated ? `updated ${updated.toLocaleTimeString()}` : "waiting for the first prices"}
+        </span>
       </div>
 
       {!hasKey && (interval <= 5000) && (
@@ -262,18 +263,21 @@ const CryptoList = () => {
         <LoadingCrypto />
       ) : (
         <div className="table-responsive">
-          <table className="table table-hover align-middle">
+          <table className="table table-hover align-middle market-table">
             <thead>
               <tr>
                 {SORTS.map((column) => (
                   <th
                     key={column.key}
                     role="button"
-                    className={column.key === "name" ? "" : "text-end"}
+                    aria-sort={sort.key === column.key ? (sort.direction === "asc" ? "ascending" : "descending") : "none"}
+                    className={`sortable ${column.key === "name" ? "" : "text-end"}`}
                     onClick={() => handlesort(column.key)}
                   >
                     {column.label}
-                    {sort.key === column.key ? (sort.direction === "asc" ? " ▲" : " ▼") : ""}
+                    {sort.key === column.key && (
+                      <span className="sort-caret">{sort.direction === "asc" ? "▲" : "▼"}</span>
+                    )}
                   </th>
                 ))}
                 <th className="text-end">last 7 days</th>
@@ -282,13 +286,15 @@ const CryptoList = () => {
             <tbody>
               {visible.map((coin) => (
                 <tr key={coin.id}>
-                  <td>{coin.market_cap_rank}</td>
                   <td>
-                    <Link className="text-decoration-none" to={`/crypto/${coin.id}`}>
-                      <span className="me-2">
-                        <CoinLogo src={coin.image} symbol={coin.symbol} name={coin.name} size={24} />
+                    <span className="rank-pill">{coin.market_cap_rank}</span>
+                  </td>
+                  <td>
+                    <Link className="coin-cell" to={`/crypto/${coin.id}`}>
+                      <CoinLogo src={coin.image} symbol={coin.symbol} name={coin.name} size={26} />
+                      <span>
+                        {coin.name} <span className="coin-symbol">{(coin.symbol || "").toUpperCase()}</span>
                       </span>
-                      {coin.name} <span className="text-muted">{(coin.symbol || "").toUpperCase()}</span>
                     </Link>
                   </td>
                   <td className="text-end">{formatPrice(coin.current_price, currency)}</td>
@@ -320,9 +326,7 @@ const CryptoList = () => {
         </div>
       )}
 
-      <p className="text-muted text-center mt-3">
-        data from coingecko
-      </p>
+      <p className="note text-center mt-3">data from coingecko</p>
     </div>
   );
 };

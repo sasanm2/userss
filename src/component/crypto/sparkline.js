@@ -1,3 +1,5 @@
+import { directionColor } from "./theme";
+
 // tiny 7 day line drawn straight into an svg, one per row of the table
 const Sparkline = ({ points: given = [], width = 140, height = 40 }) => {
   // one null in the series would turn the whole path into NaN and draw nothing
@@ -11,7 +13,9 @@ const Sparkline = ({ points: given = [], width = 140, height = 40 }) => {
   const max = Math.max(...points);
   const range = max - min || 1;
   const step = points.length > 1 ? width / (points.length - 1) : width;
-  const color = points[points.length - 1] >= points[0] ? "#198754" : "#dc3545";
+  // the row shows a signed percentage beside this, so the colour is never
+  // carrying the direction on its own
+  const color = directionColor(points[points.length - 1] - points[0]);
 
   const path = points
     .map((price, index) => {
@@ -23,7 +27,7 @@ const Sparkline = ({ points: given = [], width = 140, height = 40 }) => {
 
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      <path d={path} fill="none" stroke={color} strokeWidth="1.5" />
+      <path d={path} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
     </svg>
   );
 };
