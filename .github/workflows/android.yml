@@ -1,0 +1,83 @@
+# Builds the android apk.
+#
+# The sandbox this was written in cannot reach dl.google.com, so it cannot
+# compile an apk itself. A github runner can: it ships with the android sdk
+# already installed. Run this workflow and the apk comes out as a downloadable
+# artifact, so nobody needs android studio to get one.
+#
+# Run it from the Actions tab (Build android apk -> Run workflow), or let it
+# run on a push to the branch.
+name: Build android apk
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_base:
+        description: "REACT_APP_API_BASE, e.g. /api to use the proxy. leave empty to call coingecko directly"
+        required: false
+        default: ""
+  push:
+    branches:
+      - "claude/**"
+    paths-ignore:
+      - "**.md"
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      # the android gradle plugin needs a jdk 17
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test -- --watchAll=false
+        env:
+          CI: true
+
+      - name: Build the web app
+        run: npm run build
+        env:
+          CI: false
+          REACT_APP_API_BASE: ${{ inputs.api_base }}
+          # a key given here is inlined into the bundle, so this is only for a
+          # demo key you are willing to rotate. the proxy is the way to keep one
+          # secret
+          REACT_APP_COINGECKO_KEY: ${{ secrets.COINGECKO_DEMO_KEY }}
+
+      - name: Sync it into the android project
+        run: npx cap sync android
+
+      - name: Assemble the apk
+        run: ./gradlew assembleDebug --no-daemon
+        working-directory: android
+
+      - name: Name it after the commit
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/debug/app-debug.apk \
+             "out/top-100-coins-${GITHUB_SHA::7}.apk"
+          ls -lh out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: out/*.apk
+          if-no-files-found: error
+          retention-days: 30
