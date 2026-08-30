@@ -89,6 +89,20 @@ What it still cannot account for: the samples overlap, so they are not
 independent; it is one coin over one range, chosen after the fact; and there
 are no fees, spread or slippage in the numbers.
 
+### Reading the scan
+
+The scan page leads with the answer rather than the arithmetic: a headline, four
+tiles, then a chart of how often each indicator held its direction, with the
+50% a coin flip gives marked as a dashed line and the range the shuffled
+markets actually reached shaded behind it. Clearing that shaded band is the
+whole question, and a column of percentages does not show it at a glance.
+
+Each row carries the number of coins behind it, and a row with fewer than ten
+fades: a hundred percent of two coins is not the same claim as sixty percent of
+fifty, and it should not look like one. The exact numbers stay a click away
+under "show the numbers", which is also the table view for anyone reading with
+a screen reader.
+
 ### Walking it forward
 
 The replay above is in sample: every signal is scored on the same bars it was

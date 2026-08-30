@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { getTopCoins, getCoinOhlc, isRateLimited, hasKey } from "./cryptoapi";
 import { walkForward } from "./walkforward";
 import { aggregate, scanVerdict } from "./aggregate";
+import ScanChart from "./scanchart";
 import { permutationTest } from "./permutation";
 import "./crypto.css";
 
@@ -37,6 +38,7 @@ const Scan = () => {
   const stop = useRef(false);
 
   // the shuffled history test, run on demand over the candles already fetched
+  const [showTables, setShowTables] = useState(false);
   const [replicates, setReplicates] = useState(50);
   const [shuffling, setShuffling] = useState(false);
   const [shuffleDone, setShuffleDone] = useState(0);
@@ -133,19 +135,15 @@ const Scan = () => {
         </Link>
       </div>
 
-      <p className="text-muted">
-        <small>
-          The coin page tests an indicator against one chart, where a rule can hold by luck. This
-          runs the same walk forward test over the top coins and pools the answers, so an indicator
-          has to hold across a market rather than on the one chart you happened to open. Every p
-          value is corrected for how many indicators were tried at once, since the luckiest of a
-          dozen always looks good on its own.
-        </small>
+      <p className="note" style={{ maxWidth: "62ch" }}>
+        A rule can hold on one chart by luck. This runs the same walk forward test across the top
+        coins and pools the answers, so an indicator has to hold on a market rather than on the one
+        chart you happened to open.
       </p>
 
-      <div className="row align-items-end mb-3">
-        <div className="col-auto">
-          <small className="text-muted d-block">coins</small>
+      <div className="d-flex align-items-end flex-wrap gap-3 mb-3">
+        <div>
+          <span className="field-label">coins</span>
           <div className="segmented">
             {SIZES.map((value) => (
               <button
@@ -159,8 +157,8 @@ const Scan = () => {
             ))}
           </div>
         </div>
-        <div className="col-auto">
-          <small className="text-muted d-block">horizon</small>
+        <div>
+          <span className="field-label">horizon</span>
           <div className="segmented">
             {HORIZONS.map((value) => (
               <button
@@ -174,8 +172,8 @@ const Scan = () => {
             ))}
           </div>
         </div>
-        <div className="col-auto">
-          <small className="text-muted d-block">history</small>
+        <div>
+          <span className="field-label">history</span>
           <div className="segmented">
             {[90, 180, 365].map((value) => (
               <button
@@ -189,7 +187,7 @@ const Scan = () => {
             ))}
           </div>
         </div>
-        <div className="col-auto">
+        <div>
           {running ? (
             <button onClick={() => (stop.current = true)} className="btn-quiet">
               stop
@@ -243,11 +241,58 @@ const Scan = () => {
 
       {measured.length > 0 && (
         <>
-          <div className="text-center my-3">
+          <div className="crypto-card text-center my-3">
             <div className="h4 mb-1">{read.text}</div>
             <small className="text-muted">{read.detail}</small>
           </div>
 
+          <div className="stat-row">
+            <div className="stat">
+              <span className="stat-label">coins tested</span>
+              <div className="stat-value">{measured.length}</div>
+              <span className="stat-sub">of {results.length} fetched</span>
+            </div>
+            <div className="stat">
+              <span className="stat-label">indicators</span>
+              <div className="stat-value">{summary.comparisons}</div>
+              <span className="stat-sub">every p value allows for all of them</span>
+            </div>
+            <div className="stat">
+              <span className="stat-label">beat chance</span>
+              <div className={`stat-value ${summary.survivors ? "text-success" : ""}`}>
+                {summary.survivors}
+              </div>
+              <span className="stat-sub">held on more coins than a coin flip</span>
+            </div>
+            <div className="stat">
+              <span className="stat-label">reliably reversed</span>
+              <div className={`stat-value ${summary.reversers ? "text-danger" : ""}`}>
+                {summary.reversers}
+              </div>
+              <span className="stat-sub">a sign the fit was noise</span>
+            </div>
+          </div>
+
+          <ScanChart
+            rows={summary.rows.map((row) => ({
+              label: row.label,
+              votes: row.votes,
+              rate: row.winRate === null ? 50 : row.winRate,
+              beats: row.beatsChance,
+              reverses: row.reverses,
+            }))}
+            shuffledBar={
+              permutation && permutation.nullBest
+                ? { median: permutation.nullBest.median, max: permutation.nullBest.max }
+                : null
+            }
+          />
+
+          <button className="btn-quiet my-3" onClick={() => setShowTables(!showTables)}>
+            {showTables ? "hide the numbers" : "show the numbers"}
+          </button>
+
+          {showTables && (
           <div className="table-responsive">
             <table className="table table-sm align-middle">
               <thead>
@@ -294,19 +339,16 @@ const Scan = () => {
               </tbody>
             </table>
           </div>
+          )}
 
           <div className="mt-4">
             <h4>against shuffled history</h4>
-            <p className="text-muted mb-2">
-              <small>
-                The p values above assume each coin is an independent coin flip. Coins move
-                together, so they are not, and that test is generous by an unknown amount. This
-                measures the answer instead of assuming it: the same pipeline is run against
-                histories shuffled in time, which keeps each coin's returns, its volatility and the
-                way coins move together, and destroys only the order that could make anything
-                predictable. Whatever the indicators score on that is the bar a real result has to
-                clear.
-              </small>
+            <p className="note mb-3" style={{ maxWidth: "62ch" }}>
+              The numbers so far assume each coin is an independent coin flip. Coins move together,
+              so they are not. This measures the bar instead of assuming it: the same test is run
+              against histories shuffled in time, which keeps each coin's returns, its volatility
+              and the way coins move together, and destroys only the order that could make anything
+              predictable.
             </p>
 
             <div className="row align-items-end mb-3">
@@ -352,15 +394,37 @@ const Scan = () => {
             {permutation && !permutation.tooFew && (
               <>
                 {permutation.nullBest && (
-                  <div className="alert alert-secondary">
-                    across {permutation.replicates} shuffled markets, the best any indicator managed
-                    was <strong>{permutation.nullBest.median.toFixed(0)}%</strong> of coins
-                    typically, and <strong>{permutation.nullBest.max.toFixed(0)}%</strong> at its
-                    luckiest. that is the bar, and it is well above 50% precisely because a dozen
-                    indicators are being tried at once.
+                  <div className="stat-row">
+                    <div className="stat">
+                      <span className="stat-label">the bar, typically</span>
+                      <div className="stat-value">{permutation.nullBest.median.toFixed(0)}%</div>
+                      <span className="stat-sub">what shuffled data usually reaches</span>
+                    </div>
+                    <div className="stat">
+                      <span className="stat-label">the bar, at its luckiest</span>
+                      <div className="stat-value">{permutation.nullBest.max.toFixed(0)}%</div>
+                      <span className="stat-sub">across {permutation.replicates} shuffled markets</span>
+                    </div>
+                    <div className="stat">
+                      <span className="stat-label">what a coin flip assumes</span>
+                      <div className="stat-value text-muted">50%</div>
+                      <span className="stat-sub">the gap is the correction, measured</span>
+                    </div>
+                    <div className="stat">
+                      <span className="stat-label">cleared the bar</span>
+                      <div
+                        className={`stat-value ${
+                          permutation.rows.some((row) => row.pFamilywise < 0.05) ? "text-success" : ""
+                        }`}
+                      >
+                        {permutation.rows.filter((row) => row.pFamilywise < 0.05).length}
+                      </div>
+                      <span className="stat-sub">of {permutation.rows.length} indicators</span>
+                    </div>
                   </div>
                 )}
 
+                {showTables && (
                 <div className="table-responsive">
                   <table className="table table-sm align-middle">
                     <thead>
@@ -390,8 +454,9 @@ const Scan = () => {
                     </tbody>
                   </table>
                 </div>
+                )}
 
-                <p className="text-muted">
+                <p className="note">
                   <small>
                     A p value here is the share of shuffled markets that did at least as well as the
                     real one, so it can never be zero from a finite run: with{" "}
