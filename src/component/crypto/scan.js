@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { getTopCoins, getCoinOhlc, isRateLimited, hasKey } from "./cryptoapi";
 import { walkForward } from "./walkforward";
 import { aggregate, scanVerdict } from "./aggregate";
+import { permutationTest } from "./permutation";
 import "./crypto.css";
 
 /* Runs the walk forward test over many coins at once.
@@ -16,6 +17,7 @@ import "./crypto.css";
  */
 const SIZES = [10, 25, 50, 100];
 const HORIZONS = [3, 7, 14];
+const REPLICATES = [20, 50, 100];
 // the free allowance is a few dozen calls a minute, so without a key the run
 // has to be paced or it starts coming back throttled halfway through
 const PACE_MS = hasKey ? 120 : 2200;
@@ -34,8 +36,16 @@ const Scan = () => {
   const [throttled, setThrottled] = useState(0);
   const stop = useRef(false);
 
+  // the shuffled history test, run on demand over the candles already fetched
+  const [replicates, setReplicates] = useState(50);
+  const [shuffling, setShuffling] = useState(false);
+  const [shuffleDone, setShuffleDone] = useState(0);
+  const [permutation, setPermutation] = useState(null);
+  const stopShuffle = useRef(false);
+
   useEffect(() => () => {
     stop.current = true;
+    stopShuffle.current = true;
   }, []);
 
   const run = async () => {
@@ -45,6 +55,7 @@ const Scan = () => {
     setResults([]);
     setDone(0);
     setThrottled(0);
+    setPermutation(null);
 
     try {
       const markets = await getTopCoins("usd", size, 1);
@@ -68,6 +79,7 @@ const Scan = () => {
               id: coin.id,
               name: coin.name,
               symbol: coin.symbol,
+              candles,
               walk: walkForward({ closes, candles }, { horizon, count: 4 }),
             });
           } else {
@@ -90,6 +102,22 @@ const Scan = () => {
 
     setRunning(false);
     setCurrent("");
+  };
+
+  const runShuffled = async () => {
+    stopShuffle.current = false;
+    setShuffling(true);
+    setShuffleDone(0);
+    const coins = results.filter((r) => r.candles && r.candles.length >= 120);
+    const outcome = await permutationTest(coins, {
+      horizon,
+      count: 4,
+      replicates,
+      onProgress: (done) => setShuffleDone(done),
+      shouldStop: () => stopShuffle.current,
+    });
+    setPermutation(outcome);
+    setShuffling(false);
   };
 
   const summary = aggregate(results);
@@ -265,6 +293,117 @@ const Scan = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div className="mt-4">
+            <h4>against shuffled history</h4>
+            <p className="text-muted mb-2">
+              <small>
+                The p values above assume each coin is an independent coin flip. Coins move
+                together, so they are not, and that test is generous by an unknown amount. This
+                measures the answer instead of assuming it: the same pipeline is run against
+                histories shuffled in time, which keeps each coin's returns, its volatility and the
+                way coins move together, and destroys only the order that could make anything
+                predictable. Whatever the indicators score on that is the bar a real result has to
+                clear.
+              </small>
+            </p>
+
+            <div className="row align-items-end mb-3">
+              <div className="col-auto">
+                <small className="text-muted d-block">shuffled runs</small>
+                <div className="btn-group btn-group-sm">
+                  {REPLICATES.map((value) => (
+                    <button
+                      key={value}
+                      disabled={shuffling}
+                      onClick={() => setReplicates(value)}
+                      className={`btn btn-sm ${replicates === value ? "btn-info" : "btn-outline-info"}`}
+                    >
+                      {value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="col-auto">
+                {shuffling ? (
+                  <button onClick={() => (stopShuffle.current = true)} className="btn btn-sm btn-danger">
+                    stop
+                  </button>
+                ) : (
+                  <button onClick={runShuffled} disabled={running} className="btn btn-sm btn-info">
+                    run against shuffled history
+                  </button>
+                )}
+              </div>
+              {shuffling && (
+                <div className="col">
+                  <small className="text-muted">
+                    {shuffleDone} of {replicates} shuffled markets
+                  </small>
+                </div>
+              )}
+            </div>
+
+            {permutation && permutation.tooFew && (
+              <p className="text-muted">too few coins with enough history to shuffle against.</p>
+            )}
+
+            {permutation && !permutation.tooFew && (
+              <>
+                {permutation.nullBest && (
+                  <div className="alert alert-secondary">
+                    across {permutation.replicates} shuffled markets, the best any indicator managed
+                    was <strong>{permutation.nullBest.median.toFixed(0)}%</strong> of coins
+                    typically, and <strong>{permutation.nullBest.max.toFixed(0)}%</strong> at its
+                    luckiest. that is the bar, and it is well above 50% precisely because a dozen
+                    indicators are being tried at once.
+                  </div>
+                )}
+
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle">
+                    <thead>
+                      <tr>
+                        <th>indicator</th>
+                        <th className="text-end">coins it held on</th>
+                        <th className="text-end">p vs shuffled</th>
+                        <th className="text-end">p allowing for all of them</th>
+                        <th className="text-end">verdict</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {permutation.rows.map((row) => (
+                        <tr key={row.label}>
+                          <td>{row.label}</td>
+                          <td className="text-end">
+                            {row.wins} / {row.votes}
+                            <small className="text-muted d-block">{row.rate.toFixed(0)}%</small>
+                          </td>
+                          <td className="text-end">{row.p.toFixed(3)}</td>
+                          <td className="text-end">{row.pFamilywise.toFixed(3)}</td>
+                          <td className={`text-end ${row.pFamilywise < 0.05 ? "text-success" : "text-muted"}`}>
+                            {row.pFamilywise < 0.05 ? "beats shuffled" : "no"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <p className="text-muted">
+                  <small>
+                    A p value here is the share of shuffled markets that did at least as well as the
+                    real one, so it can never be zero from a finite run: with{" "}
+                    {permutation.replicates} runs the smallest possible is{" "}
+                    {(1 / (permutation.replicates + 1)).toFixed(3)}. The last column compares each
+                    indicator with the best any indicator managed on shuffled data, which allows for
+                    having tried them all without assuming they are unrelated to each other, the way
+                    multiplying the p values does.
+                  </small>
+                </p>
+              </>
+            )}
           </div>
 
           <p className="text-muted">

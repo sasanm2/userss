@@ -62,7 +62,10 @@ export function binomialTest(k, n, p = 0.5) {
 
 /* results is one entry per coin: { id, name, walk } where walk is what
  * walkForward returned. Rows come back one per indicator, pooled over coins. */
-export function aggregate(results, { alpha = 0.05 } = {}) {
+/* Per indicator: how many coins were testable, and on how many the direction
+ * held more often than not. Shared with the shuffled history test so both
+ * count votes exactly the same way. */
+export function votesByIndicator(results) {
   const byIndicator = new Map();
 
   results.forEach((result) => {
@@ -82,16 +85,23 @@ export function aggregate(results, { alpha = 0.05 } = {}) {
     });
 
     perLabel.forEach((entry, label) => {
-      const pooled = byIndicator.get(label) || { coins: 0, held: 0, tested: 0, edge: 0, wins: 0 };
+      const pooled = byIndicator.get(label) || { coins: 0, held: 0, tested: 0, edge: 0, wins: 0, votes: 0 };
       pooled.coins += 1;
       pooled.held += entry.held;
       pooled.tested += entry.tested;
       pooled.edge += entry.edge / entry.tested;
       // a coin counts as a win when the direction held more often than not
       if (entry.held / entry.tested > 0.5) pooled.wins += 1;
+      pooled.votes = pooled.coins;
       byIndicator.set(label, pooled);
     });
   });
+
+  return byIndicator;
+}
+
+export function aggregate(results, { alpha = 0.05 } = {}) {
+  const byIndicator = votesByIndicator(results);
 
   const rows = [...byIndicator.entries()].map(([label, pooled]) => ({
     label,

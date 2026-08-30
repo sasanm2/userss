@@ -126,6 +126,40 @@ expect, and the yardstick for reading any run against real coins.
 Each coin costs one api call for its candles, so the run is on demand, paced
 for the free allowance, and can be stopped part way.
 
+### The shuffled history null
+
+The binomial test above treats each coin as an independent trial. Coins move
+together, so they are not, and that test is generous by an amount nobody can
+state from theory. The scan page can measure it instead.
+
+`permutation.js` runs the whole pipeline again against histories shuffled in
+time. The shuffle is built to destroy exactly one thing:
+
+- the order of the returns goes, so nothing in the past can predict the future
+- the returns themselves stay, so volatility and fat tails are unchanged
+- each bar keeps its own high and low as ratios to its close, so the candle
+  based indicators still see realistic ranges
+- and the same permutation is applied to every coin in a replicate, so coins
+  that moved together still do. Shuffling each coin separately would quietly
+  destroy the market wide correlation that is the entire reason the binomial
+  test was too generous, and would answer a much easier question. There is a
+  test asserting the correlation between two coins survives a shared
+  permutation and collapses under separate ones.
+
+Whatever the indicators score on shuffled data is the bar a real result has to
+clear. The last column compares each indicator against the best score any
+indicator managed on the shuffled runs, which allows for having tried them all
+without assuming, as multiplying p values does, that they are unrelated.
+
+On fifty coins built from a shared market factor plus per coin noise, where
+nothing predictive exists by construction, the shuffled runs put the bar at
+about 56% of coins typically and 80% at their luckiest, against the 50% the
+binomial test assumes. That gap is the correction, measured rather than
+guessed, and nothing in the real data cleared it.
+
+A p value from this can never be zero: with n shuffled runs the smallest
+possible is 1/(n+1).
+
 ### Checking the maths
 
 The indicators in `src/component/crypto/indicators.js` are covered two ways.
