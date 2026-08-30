@@ -160,6 +160,32 @@ guessed, and nothing in the real data cleared it.
 A p value from this can never be zero: with n shuffled runs the smallest
 possible is 1/(n+1).
 
+### Running it without the app
+
+`scripts/scan-real.cjs` runs the whole thing from the command line: it fetches
+the coins, walks each one forward, pools the results and runs them against
+shuffled histories, then prints a report and writes `scan-result.json`.
+
+```
+npm install
+npm run scan:real
+```
+
+or with options:
+
+```
+node scripts/scan-real.cjs --coins=100 --days=365 --horizon=7 --replicates=50
+node scripts/scan-real.cjs --key=CG-your-key      # no pacing, much faster
+```
+
+Without a key the run is paced for the free allowance, so a hundred coins takes
+a few minutes. `COINGECKO_BASE` points it somewhere else, which is how it is
+tested without touching the live api.
+
+It needs nothing but node and network access to coingecko: no build, no
+browser, no dev server. The output is plain text, so it can be pasted anywhere
+for someone else to read.
+
 ### Checking the maths
 
 The indicators in `src/component/crypto/indicators.js` are covered two ways.

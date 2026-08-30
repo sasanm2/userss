@@ -28,7 +28,8 @@
     "android:apk": "npm run android:sync && cd android && ./gradlew assembleDebug",
     "android:open": "npm run android:sync && npx cap open android",
     "postbuild": "node -e \"require('fs').copyFileSync('build/index.html','build/404.html')\"",
-    "verify:indicators": "python3 scripts/verify-indicators.py && node scripts/verify-indicators.cjs"
+    "verify:indicators": "python3 scripts/verify-indicators.py && node scripts/verify-indicators.cjs",
+    "scan:real": "node scripts/scan-real.cjs"
   },
   "eslintConfig": {
     "extends": [
